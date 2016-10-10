@@ -14,7 +14,7 @@ class Stitcher:
     maxOffset = 0;
 
     def calculate_offset(self,img1, img2):
-        # Calculate overlap in pixels
+        # Calculate rough overlap in pixels
         overlap_px = img2.shape[1] * CONFIG['overlap']
 
         # Convert images to grayscale and reduce size to scale_factor
@@ -41,9 +41,8 @@ class Stitcher:
         # We're not doing any robust analyses of outliers, so let's just take the median and see how it works
         x_offset = int(np.median([elem[0][0] for elem in np.subtract(src_pts, dst_pts)]))
         y_offset = int(np.median([elem[0][1] for elem in np.subtract(src_pts, dst_pts)]))
-
         # Rescale offset for original size and return
-        print('\t- Offset found: {} px'.format(x_offset * (1/CONFIG['scale_factor'])))
+        print('\t- X Offset found: {} px'.format(x_offset * (1/CONFIG['scale_factor'])))
         print('\t- Y Offset found: {} px'.format(y_offset * (1/CONFIG['scale_factor'])))
         return (x_offset * (1/CONFIG['scale_factor']),y_offset * (1/CONFIG['scale_factor']))
 
@@ -85,3 +84,4 @@ class Stitcher:
             callback(1, round(i / len(images) * 100));
 
         cv2.imwrite(outputPath, composite)
+        callback(1, 100);

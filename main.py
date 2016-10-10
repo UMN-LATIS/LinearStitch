@@ -11,35 +11,38 @@ class MyFirstGUI:
 	fileList = None;
 	progress = 0;
 
+	def shorten_filename(self,filename):
+		f = os.path.split(filename)[1]
+		return "%s~%s" % (f[:3], f[-16:]) if len(f) > 19 else f
+
 	def __init__(self, master):
 		self.master = master
 		master.title("Stitcher")
-		self.outputFile = ""
+		self.outputFile = None
 		self.browse_button = tkinter.Button(master, text="Select Files", command=self.browseFiles)
-		self.browse_button.pack()
+		self.browse_button.grid(row=0)
 
 		self.save_file = tkinter.Button(master, text="Output File", command=self.saveFile)
-		self.save_file.pack()
+		self.save_file.grid(row=1)
 
-		frame1 = tkinter.Frame(master)
-		frame1.pack(fill=tkinter.X)
 
 		self.file_label_text = tkinter.StringVar()
 		self.file_label_text.set(self.outputFile)
-		self.file_label = tkinter.Label(frame1, textvariable=self.file_label_text)
-		self.label = tkinter.Label(frame1, text="Output File:")
-		self.label.pack(side=tkinter.LEFT, padx=5, pady=5);
-		self.file_label.pack(fill=tkinter.X, padx=5, expand=True);
+		self.file_label = tkinter.Label(master, textvariable=self.file_label_text)
+		self.label = tkinter.Label(master, text="Output File:")
+		self.label.grid(row=2, column=0)
+		self.file_label.grid(row=2, column=1)
 
 
 		self.stitch = tkinter.Button(master, text="Stitch", command=self.stitch)
-		self.stitch.pack(side=tkinter.LEFT)
+		self.stitch.grid(row=3, column=1)
 
 		self.progressText = tkinter.IntVar()
 		self.progressText.set(self.progress)
 		
+		tkinter.Label(master, text="Progress :").grid(row=4,column=0)
 		self.progress_label = tkinter.Label(master, textvariable=self.progressText)
-		self.progress_label.pack();
+		self.progress_label.grid(row=4, column=1)
 		
 	def browseFiles(self):
 		# Tk().withdraw()
@@ -51,12 +54,14 @@ class MyFirstGUI:
 	def saveFile(self):
 		# Tk().withdraw()
 		self.outputFile = filedialog.asksaveasfilename(filetypes=[("TIFF", ".tiff")], title="Select Output File")
-		self.file_label_text.set(self.outputFile)
+		self.file_label_text.set(self.shorten_filename(self.outputFile))
 
 	def stitch(self):
 		stitcherHandler = Stitcher()
 		print(self.fileList)
 		print(self.outputFile);
+		if(self.outputFile is None):
+			exit()
 		_thread.start_new_thread(stitcherHandler.stitchFileList, (self.fileList, self.outputFile, self.progressCallback))
 
 
@@ -65,6 +70,6 @@ class MyFirstGUI:
 
 
 root = tkinter.Tk()
-root.geometry('{}x{}'.format(640, 300))
+root.geometry('{}x{}'.format(400, 200))
 my_gui = MyFirstGUI(root)
 root.mainloop()
