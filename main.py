@@ -6,7 +6,7 @@ from tkinter import filedialog
 from stitcher import Stitcher
 import _thread
 
-class MyFirstGUI:
+class Stitcher:
 
 	fileList = None;
 	progress = 0;
@@ -71,5 +71,5 @@ class MyFirstGUI:
 
 root = tkinter.Tk()
 root.geometry('{}x{}'.format(400, 200))
-my_gui = MyFirstGUI(root)
+my_gui = Stitcher(root)
 root.mainloop()
