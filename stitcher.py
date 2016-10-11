@@ -63,14 +63,19 @@ class Stitcher:
         # Create the composite image and return
         width = x_seam + img2.shape[1]
         height = img2.shape[0] + abs(int(self.maxOffset))
-        comp_img = np.zeros((height, width, 3), np.uint8)
+        
 
         if(y_offset < 0.0):
-            comp_img[int(y_offset):img1.shape[0]+int(abs(y_offset)), 0:x_seam] = img1[0:img1.shape[0], 0:x_seam]
+            comp_img = np.zeros((height+int(abs(y_offset)), width, 3), np.uint8)
+            self.maxOffset += int(abs(y_offset))
+            comp_img[int(abs(y_offset)):img1.shape[0]+int(abs(y_offset)), 0:x_seam] = img1[0:img1.shape[0], 0:x_seam]
+            comp_img[0:img2.shape[0], x_seam:] = img2
         else:
+            comp_img = np.zeros((height, width, 3), np.uint8)
             comp_img[0:img1.shape[0], 0:x_seam] = img1[0:img1.shape[0], 0:x_seam]
+            comp_img[int(y_offset):img2.shape[0]+int(y_offset), x_seam:] = img2
         
-        comp_img[int(y_offset):img2.shape[0]+int(y_offset), x_seam:] = img2
+        
         return comp_img
 
 
