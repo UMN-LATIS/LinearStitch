@@ -56,25 +56,28 @@ class Stitcher:
     def stitch_images(self,img1, img2):
         # Find the offset between the images and calcuate where the seam lies
         x_offset, y_offset = self.calculate_offset(img1, img2)
-        x_seam = int(img1.shape[1] - img2.shape[1] * CONFIG['overlap'] + x_offset)
+
+        # we want to seam the images such that we crop the left and right equally.  So use roughly have the overlap betwen them.
+        x_seam = int(img1.shape[1] - (img2.shape[1] * CONFIG['overlap']*.5) + x_offset)
         
+        # how much of the new image should we crop out?
+        partialImage = int(img2.shape[1] * CONFIG['overlap']*.5);
+
         self.maxOffset = max(self.maxOffset, y_offset);
 
         # Create the composite image and return
-        width = x_seam + img2.shape[1]
+        width = x_seam + (img2.shape[1]-partialImage)
         height = img2.shape[0] + abs(int(self.maxOffset))
-        
 
         if(y_offset < 0.0):
             comp_img = np.zeros((height+int(abs(y_offset)), width, 3), np.uint8)
             self.maxOffset += int(abs(y_offset))
             comp_img[int(abs(y_offset)):img1.shape[0]+int(abs(y_offset)), 0:x_seam] = img1[0:img1.shape[0], 0:x_seam]
-            comp_img[0:img2.shape[0], x_seam:] = img2
+            comp_img[0:img2.shape[0], x_seam:(x_seam+img2.shape[1]-partialImage)] = img2[0:img2.shape[0], partialImage:img2.shape[1]]
         else:
             comp_img = np.zeros((height, width, 3), np.uint8)
             comp_img[0:img1.shape[0], 0:x_seam] = img1[0:img1.shape[0], 0:x_seam]
-            comp_img[int(y_offset):img2.shape[0]+int(y_offset), x_seam:] = img2
-        
+            comp_img[int(y_offset):img2.shape[0]+int(y_offset), x_seam:(x_seam+img2.shape[1]-partialImage)] = img2[0:img2.shape[0], partialImage:img2.shape[1]]
         
         return comp_img
 
@@ -92,7 +95,9 @@ class Stitcher:
 
             print("Stitching Image {} and {}".format(i, i + 1))
             composite = self.stitch_images(img1, img2)
-            callback(1, round(i / len(images) * 100));
+            if(callback):
+                callback(1, round(i / len(images) * 100));
 
         cv2.imwrite(outputPath, composite)
-        callback(1, 100);
+        if(callback):
+            callback(1, 100);
