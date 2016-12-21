@@ -31,7 +31,7 @@ class Stitcher:
         # Use FLANN to determine matches
         print('\t- Finding matches')
 
-        # As of 10/11/2016, Flann is broken on binary builds of opencv for windows.  Fall back to flann in those cases.
+        # As of 10/11/2016, Flann is broken on binary builds of opencv for windows.  Fall back to BF in those cases.
         if(platform.system() != 'Windows'):
             flann = cv2.FlannBasedMatcher({'algorithm': 0, 'trees': 5}, {'checks': CONFIG['flann_checks']})
             matches = flann.knnMatch(des1, des2, k=2)
