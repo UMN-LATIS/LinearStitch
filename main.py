@@ -49,7 +49,11 @@ class StitcherGUI:
 		files = filedialog.askopenfilenames(filetypes = (("JPEG", "*.jpeg"),("JPEG", "*.jpg")
 														 ,("PNG", "*.png")
 														 ,("All files", "*.*") ))
+		parentName = os.path.split(os.path.dirname(files[0]))[1]
+		self.outputFile = os.path.join(os.path.dirname(files[0]),parentName + ".tiff")
+		self.file_label_text.set(parentName + ".tiff")
 		self.fileList = root.tk.splitlist(files)
+
 
 	def saveFile(self):
 		# Tk().withdraw()
