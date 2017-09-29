@@ -12,6 +12,7 @@ class StitcherGUI:
 
 	fileList = None;
 	progress = 0;
+	# maskImages = 0;
 
 	def shorten_filename(self,filename):
 		f = os.path.split(filename)[1]
@@ -23,6 +24,11 @@ class StitcherGUI:
 		self.outputFile = None
 		self.browse_button = tkinter.Button(master, text="Select Folders", command=self.browseFiles)
 		self.browse_button.grid(row=0)
+
+		self.maskImages = tkinter.BooleanVar()
+		self.maskImages.set(0);
+		self.mask_button = tkinter.Checkbutton(master, text="Mask Images", onvalue=1, offvalue=0,variable=self.maskImages)
+		self.mask_button.grid(row=5)
 
 
 		self.stitch = tkinter.Button(master, text="Stack and Stitch", command=self.start)
@@ -51,7 +57,6 @@ class StitcherGUI:
 		self.fileList = root.tk.splitlist(dirs)
 
 	def start(self):
-
 		for folder in self.fileList:
 			onlyFiles = [f for f in os.listdir(folder) if isfile(join(folder, f))]
 			print(onlyFiles)
@@ -70,7 +75,7 @@ class StitcherGUI:
 		# _thread.start_new_thread(stitcherHandler.stitchFileList, (self.fileList, self.outputFile, self.progressCallback))
 
 	def stack(self, xmlFile):
-		commandLine = r'"C:/Program Files/ZereneStacker/jre/bin/java.exe" -Xmx20000m -DjavaBits=64bitJava -Dlaunchcmddir="C:/Documents and Settings/AISOS Lab PC/Application Data/ZereneStacker" -classpath "C:/Program Files/ZereneStacker/ZereneStacker.jar;C:/Program Files/ZereneStacker/JREextensions/*" com.zerenesystems.stacker.gui.MainFrame -noSplashScreen -exitOnBatchScriptCompletion -runMinimized  -batchScript "' + xmlFile + '"'
+		commandLine = r'"C:/Program Files/ZereneStacker/jre/bin/java.exe" -Xmx8000m -DjavaBits=64bitJava -Dlaunchcmddir="C:/Documents and Settings/AISOS Lab PC/Application Data/ZereneStacker" -classpath "C:/Program Files/ZereneStacker/ZereneStacker.jar;C:/Program Files/ZereneStacker/JREextensions/*" com.zerenesystems.stacker.gui.MainFrame -noSplashScreen -exitOnBatchScriptCompletion -runMinimized  -batchScript "' + xmlFile + '"'
 		subprocess.call( commandLine, stdout=DEVNULL, stderr=subprocess.STDOUT)
 
 	def stitchFolder(self, targetFolder):
@@ -88,7 +93,7 @@ class StitcherGUI:
 		print(outputFile);
 		if(outputFile is None):
 			exit()
-		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile, self.progressCallback))
+		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile, self.progressCallback, self.maskImages.get()))
 
 
 	def progressCallback(self, status, progress):

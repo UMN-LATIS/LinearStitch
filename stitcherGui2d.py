@@ -3,7 +3,7 @@ import numpy as np
 import os
 import tkinter
 from tkinter import filedialog
-from stitcher import Stitcher
+from twodstitcher import TwoDStitcher
 import _thread
 
 class StitcherGUI:
@@ -27,11 +27,6 @@ class StitcherGUI:
 
 		self.save_file = tkinter.Button(master, text="Output File", command=self.saveFile)
 		self.save_file.grid(row=1)
-
-		self.maskImages = tkinter.BooleanVar()
-		self.maskImages.set(0);
-		self.mask_button = tkinter.Checkbutton(master, text="Mask Images", onvalue=1, offvalue=0,variable=self.maskImages)
-		self.mask_button.grid(row=5)
 
 
 		self.file_label_text = tkinter.StringVar()
@@ -69,21 +64,53 @@ class StitcherGUI:
 		self.file_label_text.set(self.shorten_filename(self.outputFile))
 
 	def stitch(self):
-		stitcherHandler = Stitcher()
+		stitcherHandler = TwoDStitcher()
 		print(self.fileList)
 		print(self.outputFile);
 		if(self.outputFile is None):
 			exit()
 
+		columnArray = []
+		for file in self.fileList:
+			filename = os.path.basename(file)
+			splitString = filename.split("_row")
+			columnInfo = int(splitString[0][4:])
+			if(len(columnArray) < columnInfo):
+				columnArray.append([]);
+			columnArray[columnInfo-1].append(file)
+
+		self.columnList = columnArray;
+
+		firstItem = self.columnList.pop(0)
 		parentName = os.path.split(os.path.dirname(self.fileList[0]))[1]
-		outputFile = os.path.join(os.path.dirname(self.fileList[0]),parentName + str(len(self.fileList)) + ".tiff")
+		outputFile = os.path.join(os.path.dirname(self.fileList[0]),parentName + str(len(self.columnList)) + ".tiff")
 		self.finishedFiles = []
 		self.finishedFiles.append(outputFile)
 
-		_thread.start_new_thread(stitcherHandler.stitchFileList, (self.fileList, outputFile,self.progressCallback,self.maskImages.get()))
+		_thread.start_new_thread(stitcherHandler.stitchFileList, (firstItem, outputFile, "vertical",self.progressCallback))
+
+	def popNextJob(self):
+		stitcherHandler = TwoDStitcher()
+		if(self.readyToTerminate):
+			exit()
+
+		if(len(self.columnList) == 0):
+			print(self.finishedFiles)
+			self.readyToTerminate = True
+			_thread.start_new_thread(stitcherHandler.stitchFileList, (self.finishedFiles, self.outputFile, "horizontal",self.progressCallback))
+		else:
+			firstItem = self.columnList.pop(0)
+			parentName = os.path.split(os.path.dirname(self.fileList[0]))[1]
+			outputFile = os.path.join(os.path.dirname(self.fileList[0]),parentName + str(len(self.columnList)) + ".tiff")
+			self.finishedFiles.append(outputFile);
+
+			_thread.start_new_thread(stitcherHandler.stitchFileList, (firstItem, outputFile, "vertical",self.progressCallback))
+
 
 	def progressCallback(self, status, progress):
 		self.progressText.set(progress);
+		if(progress == 100):
+			self.popNextJob();
 
 
 root = tkinter.Tk()

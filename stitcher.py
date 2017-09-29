@@ -13,7 +13,7 @@ CONFIG['flann_checks'] = 12
 class Stitcher:
     maxOffset = 0;
 
-    def calculate_offset(self,img1, img2):
+    def calculate_offset(self,img1, img2, enableMask):
         # Calculate rough overlap in pixels
         overlap_px = img2.shape[1] * CONFIG['overlap']
 
@@ -21,12 +21,21 @@ class Stitcher:
         i1 = cv2.cvtColor(cv2.resize(img1[:, -int(overlap_px):, :], (0, 0), fx=CONFIG['scale_factor'], fy=CONFIG['scale_factor']), cv2.COLOR_BGR2GRAY)
         i2 = cv2.cvtColor(cv2.resize(img2[:, :int(overlap_px), :], (0, 0), fx=CONFIG['scale_factor'], fy=CONFIG['scale_factor']), cv2.COLOR_BGR2GRAY)
 
+
+        if(enableMask):
+            height, width = i1.shape[:2]
+            mask = np.zeros(i1.shape[:2], np.uint8)
+            rounded = round(height/4);
+            mask[rounded:height-rounded, 0:width] = 255
+        else:
+            mask = None;
+
         # Find SIFT keypoints and descriptors
         sift = cv2.xfeatures2d.SIFT_create(nfeatures=CONFIG['max_features'])
         print('\t- Finding keypoints and descriptors for image 1')
-        kp1, des1 = sift.detectAndCompute(i1, None)
+        kp1, des1 = sift.detectAndCompute(i1, mask)
         print('\t- Finding keypoints and descriptors for image 2')
-        kp2, des2 = sift.detectAndCompute(i2, None)
+        kp2, des2 = sift.detectAndCompute(i2, mask)
 
         # Use FLANN to determine matches
         print('\t- Finding matches')
@@ -53,9 +62,9 @@ class Stitcher:
         return (x_offset * (1/CONFIG['scale_factor']),y_offset * (1/CONFIG['scale_factor']))
 
 
-    def stitch_images(self,img1, img2):
+    def stitch_images(self,img1, img2, enableMask):
         # Find the offset between the images and calcuate where the seam lies
-        x_offset, y_offset = self.calculate_offset(img1, img2)
+        x_offset, y_offset = self.calculate_offset(img1, img2, enableMask)
 
         # we want to seam the images such that we crop the left and right equally.  So use roughly have the overlap betwen them.
         x_seam = int(img1.shape[1] - (img2.shape[1] * CONFIG['overlap']*.5) + x_offset)
@@ -82,8 +91,8 @@ class Stitcher:
         return comp_img
 
 
-    def stitchFileList(self,images, outputPath, callback):
-        composite = None
+    def stitchFileList(self,images, outputPath, callback, enableMask):
+        composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         for i in range(0, len(images) - 1):
             if i == 0:
@@ -94,7 +103,7 @@ class Stitcher:
                 img2 = cv2.imread(images[i + 1])
 
             print("Stitching Image {} and {}".format(i, i + 1))
-            composite = self.stitch_images(img1, img2)
+            composite = self.stitch_images(img1, img2, enableMask)
             if(callback):
                 callback(1, round(i / len(images) * 100));
 
