@@ -8,6 +8,8 @@ from tkinter import filedialog
 from stitcher import Stitcher
 import _thread
 from subprocess import DEVNULL, STDOUT, check_call
+
+
 class StitcherGUI:
 
 	fileList = None;
@@ -23,7 +25,6 @@ class StitcherGUI:
 		self.outputFile = None
 		self.browse_button = tkinter.Button(master, text="Select Folders", command=self.browseFiles)
 		self.browse_button.grid(row=0)
-
 
 		self.stitch = tkinter.Button(master, text="Stack and Stitch", command=self.start)
 		self.stitch.grid(row=3, column=1)
@@ -88,7 +89,8 @@ class StitcherGUI:
 		print(outputFile);
 		if(outputFile is None):
 			exit()
-		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile, self.progressCallback))
+		stitcherHandler.stitchFileList(filesToStitch, outputFile, self.progressCallback);
+	#	_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile, self.progressCallback))
 
 
 	def progressCallback(self, status, progress):

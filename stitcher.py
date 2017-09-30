@@ -93,11 +93,15 @@ class Stitcher:
                 img1 = composite
                 img2 = cv2.imread(images[i + 1])
 
-            print("Stitching Image {} and {}".format(i, i + 1))
-            composite = self.stitch_images(img1, img2)
-            if(callback):
-                callback(1, round(i / len(images) * 100));
+            try:
+                print("Stitching Image {} and {}".format(i, i + 1))
+                composite = self.stitch_images(img1, img2)
+                if(callback):
+                    callback(1, round(i / len(images) * 100));
+            except:
+                print("Error stitching {} and {}".format(i, i + 1))
 
-        cv2.imwrite(outputPath, composite)
+        if(composite is not None):
+            cv2.imwrite(outputPath, composite)
         if(callback):
             callback(1, 100);
