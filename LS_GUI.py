@@ -1,6 +1,10 @@
 ### installation instruction for wxPython-Phoenix  : https://wiki.wxpython.org/How%20to%20install%20wxPython#Installing_wxPython-Phoenix_using_pip
 ### modified from : https://stackoverflow.com/questions/28417602/ask-multiple-directories-dialog-in-tkinter
 ###					https://wxpython.org/pages/overview/#hello-world
+"""
+To run app, navigate to directory using the that contains LS_GUI.py using terminal. Then type:
+	$ pythonw LS_GUI.py
+"""
 
 import os
 import wx
@@ -54,7 +58,7 @@ class MultiSelect(wx.Frame):
 		for file in deleted_items:
 			self.cont.Delete(file)
 	
-	#closes window, does NOT terminate app
+	#terminates app
 	def on_exit_button(self, event):
 		self.dlg.Destroy()
 		self.Close(True)
@@ -64,7 +68,7 @@ class MultiSelect(wx.Frame):
 		while (self.cont.GetCount() != 0):
 			self.cont.Delete(0)
 
-	#closes app
+	#closes window, does NOT terminate app
 	def closewindow(self, event):
 		self.Destroy()
 
