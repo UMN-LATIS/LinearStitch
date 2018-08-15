@@ -32,13 +32,13 @@ class Stitcher:
 
         # Find SIFT keypoints and descriptors
         sift = cv2.xfeatures2d.SIFT_create(nfeatures=CONFIG['max_features'])
-        print('\t- Finding keypoints and descriptors for image 1')
+        self.logMessage('\t- Finding keypoints and descriptors for image 1')
         kp1, des1 = sift.detectAndCompute(i1, mask)
-        print('\t- Finding keypoints and descriptors for image 2')
+        self.logMessage('\t- Finding keypoints and descriptors for image 2')
         kp2, des2 = sift.detectAndCompute(i2, mask)
 
         # Use FLANN to determine matches
-        print('\t- Finding matches')
+        self.logMessage('\t- Finding matches')
 
         # As of 10/11/2016, Flann is broken on binary builds of opencv for windows.  Fall back to BF in those cases.
         if(platform.system() != 'Windows'):
@@ -57,8 +57,8 @@ class Stitcher:
         x_offset = int(np.median([elem[0][0] for elem in np.subtract(src_pts, dst_pts)]))
         y_offset = int(np.median([elem[0][1] for elem in np.subtract(src_pts, dst_pts)]))
         # Rescale offset for original size and return
-        print('\t- X Offset found: {} px'.format(x_offset * (1/CONFIG['scale_factor'])))
-        print('\t- Y Offset found: {} px'.format(y_offset * (1/CONFIG['scale_factor'])))
+        self.logMessage('\t- X Offset found: {} px'.format(x_offset * (1/CONFIG['scale_factor'])))
+        self.logMessage('\t- Y Offset found: {} px'.format(y_offset * (1/CONFIG['scale_factor'])))
         return (x_offset * (1/CONFIG['scale_factor']),y_offset * (1/CONFIG['scale_factor']))
 
 
@@ -90,10 +90,22 @@ class Stitcher:
         
         return comp_img
 
+    def logMessage(self, message):
+        self.logFile.write(message + "\n")
+        print(message)
 
-    def stitchFileList(self,images, outputPath, callback, enableMask):
+
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
+        
+        self.logFile = open(logFile, 'w');
+
+        self.logMessage("Beginning batch processing for: " + outputPath);
+        self.logMessage("Masking is: " + str(enableMask));
+        self.logMessage("Scale File Is: " + scaleImage);
+
+        firstImage = True;
         for i in range(0, len(images) - 1):
             if i == 0:
                 img1 = cv2.imread(images[i])
@@ -104,15 +116,28 @@ class Stitcher:
 
 
             try:
-                print("Stitching Image {} and {}".format(i, i + 1))
+                self.logMessage("Stitching Image {} and {}".format(images[i], images[i + 1]))
                 composite = self.stitch_images(img1, img2, enableMask)
+                if(firstImage):
+                    firstImage = False;
+                    if(scaleImage):
+                        img1 = cv2.imread(scaleImage);
+                        h1, w1 = img1.shape[:2]
+                        h2, w2 = composite.shape[:2]
+                        vis = np.zeros((max(h1, h2), w1+w2, 3), np.uint8)
+                        vis[:h1, :w1] = img1
+                        vis[:h2, w1:w1+w2] = composite
+                        composite = vis
+
                 if(callback):
                     callback(1, round(i / len(images) * 100));
             except:
-                print("Error stitching {} and {}".format(i, i + 1))
+                self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
 
         if(composite is not None):
             cv2.imwrite(outputPath, composite)
 
         if(callback):
             callback(1, 100);
+
+        self.logFile.close();
