@@ -9,6 +9,8 @@ To run app, navigate to directory using the that contains LS_GUI.py using termin
 import os
 import wx
 import wx.lib.agw.multidirdialog as MDD
+import cv2
+import numpy
 
 import sys
 from PyQt5.QtWidgets import (QFileDialog, QAbstractItemView, QListView,
@@ -22,15 +24,22 @@ import stitcher
 from stitcher import Stitcher
 from subprocess import DEVNULL, STDOUT, check_call
 
+import statistics
+
+import configparser
 
 from string import Template
 
+import threading
+from queue import Queue
+
+import time
+
 class LinearStitch(wx.Frame):
-	zereneLaunchPath = r'"C:/Program Files/ZereneStacker/jre/bin/java.exe" -Xmx8000m -DjavaBits=64bitJava -Dlaunchcmddir="C:/Documents and Settings/AISOS Lab PC/Application Data/ZereneStacker" -classpath "C:/Program Files/ZereneStacker/ZereneStacker.jar;C:/Program Files/ZereneStacker/JREextensions/*" com.zerenesystems.stacker.gui.MainFrame -noSplashScreen -exitOnBatchScriptCompletion -runMinimized  -batchScript'
-	templateFile = "zereneTemplate.xml"
 
 	# Our normal wxApp-derived class, as usual
 	app = wx.App(0)
+	config = None
 
 	#menu where directory selection(s) will be made
 	dlg = MDD.MultiDirDialog(None, title="Select Cores", defaultPath=os.getcwd(),  # defaultPath="C:/Users/users/Desktop/",
@@ -48,7 +57,17 @@ class LinearStitch(wx.Frame):
 
 	progressGauge = None
 
+	QUEUE = Queue()
+
 	def __init__(self, parent, title):
+		self.config = configparser.ConfigParser()
+		self.config.read('config.ini')
+
+		for w in range(int(self.config['Processing']['CoreCount'])):
+			t = threading.Thread(target=self.scanWorker, name='worker-%s' % w)
+			t.daemon = True
+			t.start()
+
 		wx.Frame.__init__(self, parent, -1, title,
 						  pos=(150, 150), size=(600, 500))
 
@@ -208,7 +227,76 @@ class LinearStitch(wx.Frame):
 			self.cont.InsertItems(dlg.selectedFiles(), 0)
 
 	def scanForProblems(self, event):
-		print("SCANNING")
+		print("Starting Scan")
+		for folder in self.cont.GetStrings():
+			# self.scanCore(folder)
+			self.QUEUE.put(folder)
+
+	def scanCore(self, folder):
+		childrenCores = [f for f in os.listdir(folder) if isdir(join(folder, f))]
+		childrenCores.sort()
+		fileCountList = [];
+		outputText = ""
+		outputText += "Scanning for problems in: " + folder + "\n"
+		outputText += "------------------------------------" + "\n"
+		for core in childrenCores:
+			fileCount = 0
+			(problemList, fileCount) = self.scanFolder(folder + "/" + core)
+			fileCountList.append(fileCount)
+			if(len(problemList) > 0):
+				for problemFile in problemList:
+					outputText += "Problem detected in: " + folder + "/" + core + "/" + problemFile + "\n"
+
+		coreMode = max(set(fileCountList), key=fileCountList.count)
+		for index, core in enumerate(fileCountList):
+			if(core != coreMode):
+				outputText += "File count mismatch in: " + folder + "/" + childrenCores[index] + "\n"
+		outputText += "------------------------------------" + "\n" + "\n"
+		self.echo(outputText)
+
+	def echo(self, text):
+		print(text)
+
+	def scanFolder(self, path):
+		files = [f for f in os.listdir(path) if isfile(join(path, f))]
+		colorAverage = []
+		fileCount = 0
+
+		files.sort()
+		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]  
+
+		for file in onlyJpegs:
+			fileCount += 1
+			myimg = cv2.imread(path + "/" + file)
+			avg_color_per_row = numpy.average(myimg, axis=0)
+			avg_color = numpy.average(avg_color_per_row, axis=0)
+			colorAverage.append(avg_color)
+
+		hasProblem = False
+		meanValues = numpy.array(colorAverage).mean(axis=0)
+
+		problemIndex = []
+
+		for index, item in enumerate(colorAverage):
+			distance = numpy.array(item) - meanValues
+			if(not all(abs(i) <= 20 for i in distance)):
+				hasProblem = True
+				problemIndex.append(index)
+
+		problemFiles = []
+		for problemItem in problemIndex:
+			problemFiles.append(onlyJpegs[problemItem])
+
+		return problemFiles, fileCount
+
+	def scanWorker(self):
+		while True:
+			if not self.QUEUE.empty():
+				folder = self.QUEUE.get()
+				self.scanCore(folder)
+				self.QUEUE.task_done()
+			time.sleep(1)
+
 
 	def startProcessing(self, event):
 
@@ -232,7 +320,7 @@ class LinearStitch(wx.Frame):
 			sourceString += '<Source value="' + folder + "/" + stackFolder + '"/>\n'
 
 		substitutionDict = { 'batchLength': len(onlyFolders), 'sourceFiles': sourceString, 'outputPath': folder +"/" }
-		template = open( self.templateFile )
+		template = open( self.config['Zerene']['TemplateFile'] )
 		src = Template( template.read() )
 		populatedTemplate = src.substitute(substitutionDict)
 
@@ -241,9 +329,8 @@ class LinearStitch(wx.Frame):
 		output.write(populatedTemplate)
 		output.close();
 
-		commandLine = self.zereneLaunchPath + ' "' + xmlFile + '"'
-		print(commandLine)
-		exit()
+		commandLine = self.config['Zerene']['LaunchPath'] + ' "' + xmlFile + '"'
+
 		subprocess.call( commandLine, stdout=DEVNULL, stderr=subprocess.STDOUT)
 
 	def stitchFolder(self, targetFolder):
@@ -304,6 +391,6 @@ class MyApp(wx.App):
 		return True
 
 qapp = QApplication(sys.argv)
-app = MyApp(redirect=False)
+app = MyApp(redirect=True)
 app.MainLoop()
 
