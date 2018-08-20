@@ -45,12 +45,12 @@ class LinearStitch(wx.Frame):
 	#menu where directory selection(s) will be made
 	dlg = MDD.MultiDirDialog(None, title="Select Cores", defaultPath=os.getcwd(),  # defaultPath="C:/Users/users/Desktop/",
 							agwStyle=MDD.DD_MULTIPLE|MDD.DD_DIR_MUST_EXIST)
-	
+
 	singleDlg = MDD.MultiDirDialog(None, title="Select Scale", defaultPath=os.getcwd(),  # defaultPath="C:/Users/users/Desktop/",
 							agwStyle=MDD.DD_DIR_MUST_EXIST)
 
 	#setup listbox list as global var
-	init_list = []	
+	init_list = []
 	cont = None
 	scalePath = ""
 
@@ -60,6 +60,7 @@ class LinearStitch(wx.Frame):
 
 	ScanQueue = Queue()
 	StitchQueue = Queue()
+	StackQueue = Queue()
 
 	def __init__(self, parent, title):
 		self.config = configparser.ConfigParser()
@@ -71,6 +72,10 @@ class LinearStitch(wx.Frame):
 			t.start()
 
 		t = threading.Thread(target=self.stitchWorker, name='worker-%s' % w)
+		t.daemon = True
+		t.start()
+
+		t = threading.Thread(target=self.stackWorker, name='worker-%s' % w)
 		t.daemon = True
 		t.start()
 
@@ -86,7 +91,7 @@ class LinearStitch(wx.Frame):
 		# Create the menubar
 		menuBar = wx.MenuBar()
 
-		# and a menu 
+		# and a menu
 		menu = wx.Menu()
 
 		# add an item to the menu, using \tKeyName automatically
@@ -109,14 +114,14 @@ class LinearStitch(wx.Frame):
 		addbutton = wx.Button(panel, label = "+")
 		delbutton = wx.Button(panel, label = "-")
 
-		
+
 
 		self.cont = wx.ListBox(panel, -1, (0,0), (200, 200), self.init_list, wx.LB_EXTENDED)
 
-		
+
 		scale_horzSizer = wx.BoxSizer( wx.HORIZONTAL )
 		selectScale = wx.Button(panel, label = "Select Scale")
-		self.scaleControl = wx.TextCtrl(panel, size=(400, -1), style=wx.TE_READONLY) 
+		self.scaleControl = wx.TextCtrl(panel, size=(400, -1), style=wx.TE_READONLY)
 		scale_horzSizer.Add(selectScale, 0, wx.ALL, 10);
 		scale_horzSizer.Add(self.scaleControl, 0, wx.ALL, 10);
 
@@ -126,7 +131,7 @@ class LinearStitch(wx.Frame):
 
 		panelCtrls_horzSizer = wx.BoxSizer( wx.HORIZONTAL )
 		buttonSizer = wx.BoxSizer(wx.VERTICAL)
-		
+
 		buttonSizer.Add(addbutton, 0, wx.ALL, 10)
 		buttonSizer.Add(delbutton, 0, wx.ALL, 10)
 		buttonSizer.Add(clearbutton, 0, wx.ALL, 10)
@@ -200,17 +205,17 @@ class LinearStitch(wx.Frame):
 		if dlg.exec_() == QDialog.Accepted:
 			selectedFiles = dlg.selectedFiles()
 			self.scalePath = selectedFiles[0]
-			self.scaleControl.SetValue(self.scalePath)	
+			self.scaleControl.SetValue(self.scalePath)
 
 
-		
+
 	#deletes currently selected directory/directories from listbox
 	def on_del_button(self,event):
 		deleted_items = self.cont.GetSelections()
 		deleted_items.reverse()
 		for file in deleted_items:
 			self.cont.Delete(file)
-	
+
 	#terminates app
 	def on_exit_button(self, event):
 		self.dlg.Destroy()
@@ -228,7 +233,7 @@ class LinearStitch(wx.Frame):
 
 	#obtains path for selected directory to be added to the listbox
 	def selectFolders(self):
-				
+
 		dlg = getExistingDirectories()
 		if dlg.exec_() == QDialog.Accepted:
 			self.cont.InsertItems(dlg.selectedFiles(), 0)
@@ -270,7 +275,7 @@ class LinearStitch(wx.Frame):
 		fileCount = 0
 
 		files.sort()
-		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]  
+		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]
 
 		for file in onlyJpegs:
 			fileCount += 1
@@ -312,6 +317,14 @@ class LinearStitch(wx.Frame):
 				self.StitchQueue.task_done()
 			time.sleep(1)
 
+	def stackWorker(self):
+		while True:
+			if not self.StackQueue.empty():
+				folder = self.StackQueue.get()
+				self.stack(folder)
+				self.StackQueue.task_done()
+			time.sleep(1)
+
 
 	def startProcessing(self, event):
 
@@ -322,8 +335,9 @@ class LinearStitch(wx.Frame):
 			print(onlyFiles)
 			print(folder)
 			if(self.stackImages.IsChecked()):
-				self.stack(folder)
-			self.StitchQueue.put(folder)
+				self.StackQueue.put(folder)
+			else:
+				self.StitchQueue.put(folder)
 
 	def stack(self, folder):
 
@@ -346,6 +360,7 @@ class LinearStitch(wx.Frame):
 		commandLine = self.config['Zerene']['LaunchPath'] + ' "' + xmlFile + '"'
 
 		subprocess.call( commandLine, stdout=DEVNULL, stderr=subprocess.STDOUT)
+		self.StitchQueue.put(folder)
 
 	def stitchFolder(self, targetFolder):
 		stitcherHandler = Stitcher()
