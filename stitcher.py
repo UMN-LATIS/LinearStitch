@@ -103,7 +103,8 @@ class Stitcher:
 
         self.logMessage("Beginning batch processing for: " + outputPath);
         self.logMessage("Masking is: " + str(enableMask));
-        self.logMessage("Scale File Is: " + scaleImage);
+        if(scaleImage):
+            self.logMessage("Scale File Is: " + scaleImage);
 
         firstImage = True;
         for i in range(0, len(images) - 1):

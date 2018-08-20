@@ -64,7 +64,7 @@ class StitcherGUI:
 			print(folder)
 			for files in onlyFiles:
 				if(files.endswith(".xml")):
-					self.stack(folder + "/" + files)
+					# self.stack(folder + "/" + files)
 					self.stitchFolder(folder)
 
 
@@ -95,7 +95,7 @@ class StitcherGUI:
 		if(outputFile is None):
 			exit()
 
-		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile, self.progressCallback, self.maskImages.get()))
+		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile,"test.txt", self.progressCallback, self.maskImages.get(), None))
 
 
 	def progressCallback(self, status, progress):

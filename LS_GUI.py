@@ -22,6 +22,7 @@ from os.path import expanduser
 
 import stitcher
 from stitcher import Stitcher
+import subprocess
 from subprocess import DEVNULL, STDOUT, check_call
 
 import statistics
@@ -57,7 +58,8 @@ class LinearStitch(wx.Frame):
 
 	progressGauge = None
 
-	QUEUE = Queue()
+	ScanQueue = Queue()
+	StitchQueue = Queue()
 
 	def __init__(self, parent, title):
 		self.config = configparser.ConfigParser()
@@ -67,6 +69,11 @@ class LinearStitch(wx.Frame):
 			t = threading.Thread(target=self.scanWorker, name='worker-%s' % w)
 			t.daemon = True
 			t.start()
+
+		t = threading.Thread(target=self.stitchWorker, name='worker-%s' % w)
+		t.daemon = True
+		t.start()
+
 
 		wx.Frame.__init__(self, parent, -1, title,
 						  pos=(150, 150), size=(600, 500))
@@ -230,7 +237,7 @@ class LinearStitch(wx.Frame):
 		print("Starting Scan")
 		for folder in self.cont.GetStrings():
 			# self.scanCore(folder)
-			self.QUEUE.put(folder)
+			self.ScanQueue.put(folder)
 
 	def scanCore(self, folder):
 		childrenCores = [f for f in os.listdir(folder) if isdir(join(folder, f))]
@@ -291,10 +298,18 @@ class LinearStitch(wx.Frame):
 
 	def scanWorker(self):
 		while True:
-			if not self.QUEUE.empty():
-				folder = self.QUEUE.get()
+			if not self.ScanQueue.empty():
+				folder = self.ScanQueue.get()
 				self.scanCore(folder)
-				self.QUEUE.task_done()
+				self.ScanQueue.task_done()
+			time.sleep(1)
+
+	def stitchWorker(self):
+		while True:
+			if not self.StitchQueue.empty():
+				folder = self.StitchQueue.get()
+				self.stitchFolder(folder)
+				self.StitchQueue.task_done()
 			time.sleep(1)
 
 
@@ -306,10 +321,9 @@ class LinearStitch(wx.Frame):
 			onlyFiles = [f for f in os.listdir(folder) if isfile(join(folder, f))]
 			print(onlyFiles)
 			print(folder)
-			for files in onlyFiles:
-				if(self.stackImages.IsChecked()):
-					self.stack(folder)
-				self.stitchFolder(folder)
+			if(self.stackImages.IsChecked()):
+				self.stack(folder)
+			self.StitchQueue.put(folder)
 
 	def stack(self, folder):
 
@@ -351,7 +365,8 @@ class LinearStitch(wx.Frame):
 		if(outputFile is None):
 			exit()
 
-		_thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile,logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath))
+		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath)
+		# _thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile,logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath))
 
 
 	def progressCallback(self, status, progress):
@@ -391,6 +406,6 @@ class MyApp(wx.App):
 		return True
 
 qapp = QApplication(sys.argv)
-app = MyApp(redirect=True)
+app = MyApp(redirect=False)
 app.MainLoop()
 
