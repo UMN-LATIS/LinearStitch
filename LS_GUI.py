@@ -42,13 +42,6 @@ class LinearStitch(wx.Frame):
 	app = wx.App(0)
 	config = None
 
-	#menu where directory selection(s) will be made
-	dlg = MDD.MultiDirDialog(None, title="Select Cores", defaultPath=os.getcwd(),  # defaultPath="C:/Users/users/Desktop/",
-							agwStyle=MDD.DD_MULTIPLE|MDD.DD_DIR_MUST_EXIST)
-
-	singleDlg = MDD.MultiDirDialog(None, title="Select Scale", defaultPath=os.getcwd(),  # defaultPath="C:/Users/users/Desktop/",
-							agwStyle=MDD.DD_DIR_MUST_EXIST)
-
 	#setup listbox list as global var
 	init_list = []
 	cont = None
@@ -191,8 +184,6 @@ class LinearStitch(wx.Frame):
 	def OnTimeToClose(self, evt):
 		"""Event handler for the button click."""
 		print("Exiting.")
-		self.dlg.Destroy()
-		self.singleDlg.Destroy()
 		self.Close()
 
 	#opens a new menu and closes when selection(s) is made
@@ -202,6 +193,7 @@ class LinearStitch(wx.Frame):
 
 	def on_scale_button(self, event):
 		dlg = getExistingFiles()
+		dlg.setDirectory(self.config['General']['BrowsePath'])
 		if dlg.exec_() == QDialog.Accepted:
 			selectedFiles = dlg.selectedFiles()
 			self.scalePath = selectedFiles[0]
@@ -218,8 +210,6 @@ class LinearStitch(wx.Frame):
 
 	#terminates app
 	def on_exit_button(self, event):
-		self.dlg.Destroy()
-		self.singleDlg.Destroy()
 		self.Destroy()
 
 	#deletes all current directories in listbox
@@ -233,8 +223,8 @@ class LinearStitch(wx.Frame):
 
 	#obtains path for selected directory to be added to the listbox
 	def selectFolders(self):
-
 		dlg = getExistingDirectories()
+		dlg.setDirectory(self.config['General']['BrowsePath'])
 		if dlg.exec_() == QDialog.Accepted:
 			self.cont.InsertItems(dlg.selectedFiles(), 0)
 
@@ -396,7 +386,7 @@ class getExistingDirectories(QFileDialog):
 		self.setOption(self.DontUseNativeDialog, True)
 		self.setFileMode(self.Directory)
 		self.setOption(self.ShowDirsOnly, True)
-		self.setDirectory(expanduser("~"))
+		# self.setDirectory(args[0])
 		self.findChildren(QListView)[0].setSelectionMode(QAbstractItemView.ExtendedSelection)
 		self.findChildren(QTreeView)[0].setSelectionMode(QAbstractItemView.ExtendedSelection)
 
@@ -405,7 +395,6 @@ class getExistingFiles(QFileDialog):
 		super(getExistingFiles, self).__init__(*args)
 		self.setOption(self.DontUseNativeDialog, True)
 		self.setFileMode(self.ExistingFile)
-		self.setDirectory(expanduser("~"))
 		self.setOption(self.ShowDirsOnly, False)
 
 
