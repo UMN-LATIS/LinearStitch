@@ -36,6 +36,8 @@ from queue import Queue
 
 import time
 
+from zipfile import ZipFile
+
 class LinearStitch(wx.Frame):
 
 	# Our normal wxApp-derived class, as usual
@@ -54,6 +56,7 @@ class LinearStitch(wx.Frame):
 	ScanQueue = Queue()
 	StitchQueue = Queue()
 	StackQueue = Queue()
+	ArchiveQueue = Queue()
 
 	def __init__(self, parent, title):
 		self.config = configparser.ConfigParser()
@@ -69,6 +72,10 @@ class LinearStitch(wx.Frame):
 		t.start()
 
 		t = threading.Thread(target=self.stackWorker, name='worker-%s' % w)
+		t.daemon = True
+		t.start()
+
+		t = threading.Thread(target=self.archiveWorker, name='worker-%s' % w)
 		t.daemon = True
 		t.start()
 
@@ -149,10 +156,14 @@ class LinearStitch(wx.Frame):
 		self.stackImages = wx.CheckBox(panel, label="Stack Images")
 		self.stackImages.SetValue(True)
 
+		self.archiveImages = wx.CheckBox(panel, label="Achive Images")
+		self.archiveImages.SetValue(True)
+
 		sizer.Add(panelCtrls_horzSizer)
 		sizer.Add(scale_horzSizer, 0, wx.ALL, 10)
 		sizer.Add(self.maskBox, 0, wx.ALL, 10)
 		sizer.Add(self.stackImages, 0, wx.ALL, 10)
+		sizer.Add(self.archiveImages, 0, wx.ALL, 10)
 		sizer.Add(button_horzSizer, 0, wx.ALL, 10)
 		panel.SetSizer(sizer)
 		panel.Layout()
@@ -315,6 +326,39 @@ class LinearStitch(wx.Frame):
 				self.StackQueue.task_done()
 			time.sleep(1)
 
+	def get_all_file_paths(self, directory):
+
+	    # initializing empty file paths list
+	    file_paths = []
+
+	    # crawling through directory and subdirectories
+	    for root, directories, files in os.walk(directory):
+	    	for filename in files:
+	            # join the two strings in order to form the full filepath.
+	            filepath = os.path.join(root, filename)
+	            file_paths.append(filepath)
+
+	    # returning all file paths
+	    return file_paths  
+
+	def archiveWorker(self):
+		while True:
+			if not self.ArchiveQueue.empty():
+				folder = self.ArchiveQueue.get()
+				self.archive(folder)
+				self.ArchiveQueue.task_done()
+			time.sleep(1)
+
+	def archive(self, folder):
+
+		outputFile = os.path.basename(folder) + ".zip"
+		outputFilePath = os.path.join(self.config['General']['ArchivePath'], outputFile)
+		file_paths = self.get_all_file_paths(folder)
+		print("Zipping to: " + outputFilePath)
+		with ZipFile(outputFilePath,'w') as zip:
+		# writing each file one by one
+			for file in file_paths:
+				zip.write(file, os.path.relpath(file, os.path.join(folder, '..')))
 
 	def startProcessing(self, event):
 
@@ -371,6 +415,10 @@ class LinearStitch(wx.Frame):
 			exit()
 
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath)
+		
+		if(self.archiveImages.IsChecked()):
+			self.ArchiveQueue.put(targetFolder)
+
 		# _thread.start_new_thread(stitcherHandler.stitchFileList, (filesToStitch, outputFile,logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath))
 
 
@@ -410,6 +458,6 @@ class MyApp(wx.App):
 		return True
 
 qapp = QApplication(sys.argv)
-app = MyApp(redirect=False)
+app = MyApp(redirect=True)
 app.MainLoop()
 
