@@ -81,7 +81,7 @@ class LinearStitch(wx.Frame):
 
 
 		wx.Frame.__init__(self, parent, -1, title,
-						  pos=(150, 150), size=(600, 500))
+						  pos=(150, 150), size=(600, 600))
 
 
 		#panel setup for button and listbox use
