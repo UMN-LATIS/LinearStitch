@@ -259,11 +259,13 @@ class LinearStitch(wx.Frame):
 			if(len(problemList) > 0):
 				for problemFile in problemList:
 					outputText += "Problem detected in: " + folder + "/" + core + "/" + problemFile + "\n"
-
-		coreMode = max(set(fileCountList), key=fileCountList.count)
-		for index, core in enumerate(fileCountList):
-			if(core != coreMode):
-				outputText += "File count mismatch in: " + folder + "/" + childrenCores[index] + "\n"
+		if(len(fileCountList) < 2):
+			outputText += "Empty Folder: " + folder + "/" + "\n"
+		else:
+			coreMode = max(set(fileCountList), key=fileCountList.count)
+			for index, core in enumerate(fileCountList):
+				if(core != coreMode):
+					outputText += "File count mismatch in: " + folder + "/" + childrenCores[index] + "\n"
 		outputText += "------------------------------------" + "\n" + "\n"
 		self.echo(outputText)
 
@@ -277,7 +279,8 @@ class LinearStitch(wx.Frame):
 
 		files.sort()
 		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]
-
+		if(len(onlyJpegs) < 1):
+			return [], 0
 		for file in onlyJpegs:
 			fileCount += 1
 			myimg = cv2.imread(path + "/" + file)
