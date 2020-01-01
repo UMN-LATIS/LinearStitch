@@ -11,6 +11,7 @@ import wx
 import wx.lib.agw.multidirdialog as MDD
 import cv2
 import numpy
+import multiprocessing
 
 import sys
 from PyQt5.QtWidgets import (QFileDialog, QAbstractItemView, QListView,
@@ -180,6 +181,7 @@ class LinearStitch(wx.Frame):
 		#event handling - close app with "x" button located in corner
 		self.Bind(wx.EVT_CLOSE, self.on_exit_button)
 
+		self.pool=multiprocessing.Pool()
 
 	def AddLinearSpacer( self, boxsizer, pixelSpacing ) :
 		""" A one-dimensional spacer along only the major axis for any BoxSizer """
@@ -272,6 +274,7 @@ class LinearStitch(wx.Frame):
 	def echo(self, text):
 		print(text)
 
+
 	def scanFolder(self, path):
 		files = [f for f in os.listdir(path) if isfile(join(path, f))]
 		colorAverage = []
@@ -281,13 +284,16 @@ class LinearStitch(wx.Frame):
 		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]
 		if(len(onlyJpegs) < 1):
 			return [], 0
-		for file in onlyJpegs:
-			fileCount += 1
-			myimg = cv2.imread(path + "/" + file)
-			avg_color_per_row = numpy.average(myimg, axis=0)
-			avg_color = numpy.average(avg_color_per_row, axis=0)
-			colorAverage.append(avg_color)
+		proc = Processor(path)
+		# for file in onlyJpegs:
+		# 	fileCount += 1
+		# 	# myimg = cv2.imread(path + "/" + file)
+		# 	# avg_color_per_row = numpy.average(myimg, axis=0)
+		# 	# avg_color = numpy.average(avg_color_per_row, axis=0)
+		# 	colorAverage.append(avg_color)
 
+		
+		colorAverage=self.pool.map(proc,onlyJpegs)
 		hasProblem = False
 		meanValues = numpy.array(colorAverage).mean(axis=0)
 
@@ -450,7 +456,15 @@ class getExistingFiles(QFileDialog):
 		self.setFileMode(self.ExistingFile)
 		self.setOption(self.ShowDirsOnly, False)
 
+class Processor:
+	def __init__(self,path):
+		self._path=path
 
+	def __call__(self,filename):
+		myimg = cv2.imread(self._path + "/" + filename)
+		avg_color_per_row = numpy.average(myimg, axis=0)
+		avg_color = numpy.average(avg_color_per_row, axis=0)
+		return avg_color
 
 
 class MyApp(wx.App):
