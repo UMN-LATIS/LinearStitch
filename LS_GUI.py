@@ -11,6 +11,7 @@ import wx
 import wx.lib.agw.multidirdialog as MDD
 import cv2
 import numpy
+import multiprocessing
 
 import sys
 from PyQt5.QtWidgets import (QFileDialog, QAbstractItemView, QListView,
@@ -180,6 +181,7 @@ class LinearStitch(wx.Frame):
 		#event handling - close app with "x" button located in corner
 		self.Bind(wx.EVT_CLOSE, self.on_exit_button)
 
+		self.pool=multiprocessing.Pool()
 
 	def AddLinearSpacer( self, boxsizer, pixelSpacing ) :
 		""" A one-dimensional spacer along only the major axis for any BoxSizer """
@@ -259,16 +261,19 @@ class LinearStitch(wx.Frame):
 			if(len(problemList) > 0):
 				for problemFile in problemList:
 					outputText += "Problem detected in: " + folder + "/" + core + "/" + problemFile + "\n"
-
-		coreMode = max(set(fileCountList), key=fileCountList.count)
-		for index, core in enumerate(fileCountList):
-			if(core != coreMode):
-				outputText += "File count mismatch in: " + folder + "/" + childrenCores[index] + "\n"
+		if(len(fileCountList) < 2):
+			outputText += "Empty Folder: " + folder + "/" + "\n"
+		else:
+			coreMode = max(set(fileCountList), key=fileCountList.count)
+			for index, core in enumerate(fileCountList):
+				if(core != coreMode):
+					outputText += "File count mismatch in: " + folder + "/" + childrenCores[index] + "\n"
 		outputText += "------------------------------------" + "\n" + "\n"
 		self.echo(outputText)
 
 	def echo(self, text):
 		print(text)
+
 
 	def scanFolder(self, path):
 		files = [f for f in os.listdir(path) if isfile(join(path, f))]
@@ -277,14 +282,18 @@ class LinearStitch(wx.Frame):
 
 		files.sort()
 		onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]
+		if(len(onlyJpegs) < 1):
+			return [], 0
+		proc = Processor(path)
+		# for file in onlyJpegs:
+		# 	fileCount += 1
+		# 	# myimg = cv2.imread(path + "/" + file)
+		# 	# avg_color_per_row = numpy.average(myimg, axis=0)
+		# 	# avg_color = numpy.average(avg_color_per_row, axis=0)
+		# 	colorAverage.append(avg_color)
 
-		for file in onlyJpegs:
-			fileCount += 1
-			myimg = cv2.imread(path + "/" + file)
-			avg_color_per_row = numpy.average(myimg, axis=0)
-			avg_color = numpy.average(avg_color_per_row, axis=0)
-			colorAverage.append(avg_color)
-
+		
+		colorAverage=self.pool.map(proc,onlyJpegs)
 		hasProblem = False
 		meanValues = numpy.array(colorAverage).mean(axis=0)
 
@@ -447,7 +456,15 @@ class getExistingFiles(QFileDialog):
 		self.setFileMode(self.ExistingFile)
 		self.setOption(self.ShowDirsOnly, False)
 
+class Processor:
+	def __init__(self,path):
+		self._path=path
 
+	def __call__(self,filename):
+		myimg = cv2.imread(self._path + "/" + filename)
+		avg_color_per_row = numpy.average(myimg, axis=0)
+		avg_color = numpy.average(avg_color_per_row, axis=0)
+		return avg_color
 
 
 class MyApp(wx.App):
