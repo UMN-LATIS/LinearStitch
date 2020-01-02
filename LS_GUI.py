@@ -81,7 +81,7 @@ class LinearStitch(wx.Frame):
 
 
 		wx.Frame.__init__(self, parent, -1, title,
-						  pos=(150, 150), size=(600, 500))
+						  pos=(150, 150), size=(600, 600))
 
 
 		#panel setup for button and listbox use
@@ -404,6 +404,8 @@ class LinearStitch(wx.Frame):
 			if(files.endswith(".jpg")):
 				filesToStitch.append(targetFolder + "/" + files)
 
+		if(len(filesToStitch) < 2):
+			return
 		parentName = os.path.split(os.path.dirname(filesToStitch[0]))[1]
 		outputFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + ".tiff")
 		logFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + "_log.txt")

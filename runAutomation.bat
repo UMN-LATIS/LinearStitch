@@ -1,1 +1,2 @@
-activate opencv && python automationGui.py
+set PATH=C:\Users\Anthropology\Anaconda3\Scripts;%PATH%
+activate opencv && python LS_GUI.py
