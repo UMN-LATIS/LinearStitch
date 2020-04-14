@@ -478,8 +478,9 @@ class MyApp(wx.App):
 
 		frame.Show(True)
 		return True
+if __name__ == '__main__':    
+	qapp = QApplication(sys.argv)
+	app = MyApp(redirect=True)
+	app.MainLoop()
 
-qapp = QApplication(sys.argv)
-app = MyApp(redirect=True)
-app.MainLoop()
 
