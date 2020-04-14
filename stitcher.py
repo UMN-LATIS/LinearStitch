@@ -95,7 +95,7 @@ class Stitcher:
         print(message)
 
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage):
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -111,9 +111,14 @@ class Stitcher:
             if i == 0:
                 img1 = cv2.imread(images[i])
                 img2 = cv2.imread(images[i + 1])
+                if(verticalCore):
+                    img1 = cv2.rotate(img1, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                    img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
             else:
                 img1 = composite
                 img2 = cv2.imread(images[i + 1])
+                if(verticalCore):
+                    img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
 
             try:

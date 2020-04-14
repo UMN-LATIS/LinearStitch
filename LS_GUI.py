@@ -154,6 +154,7 @@ class LinearStitch(wx.Frame):
 		self.progressGauge.Hide();
 
 		self.maskBox = wx.CheckBox(panel, label="Mask Images")
+		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 		self.stackImages = wx.CheckBox(panel, label="Stack Images")
 		self.stackImages.SetValue(True)
 
@@ -163,6 +164,7 @@ class LinearStitch(wx.Frame):
 		sizer.Add(panelCtrls_horzSizer)
 		sizer.Add(scale_horzSizer, 0, wx.ALL, 10)
 		sizer.Add(self.maskBox, 0, wx.ALL, 10)
+		sizer.Add(self.verticalCore, 0, wx.ALL, 10)
 		sizer.Add(self.stackImages, 0, wx.ALL, 10)
 		sizer.Add(self.archiveImages, 0, wx.ALL, 10)
 		sizer.Add(button_horzSizer, 0, wx.ALL, 10)
@@ -425,7 +427,8 @@ class LinearStitch(wx.Frame):
 		if(outputFile is None):
 			exit()
 
-		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback, self.maskBox.IsChecked(), self.scalePath)
+		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
+		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked())
 		
 		if(self.archiveImages.IsChecked()):
 			self.ArchiveQueue.put(targetFolder)
