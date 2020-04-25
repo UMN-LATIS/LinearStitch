@@ -6,7 +6,7 @@ LinearStitch uses SIFT to identify matches between the likely-overlap regions of
 
 To run LinearStitch, you'll need to have Python3 and OpenCV 3, along with a few python dependencies.  For instructions for installtion Python3 and OpenCV3 on the Mac, visit [http://seeb0h.github.io/howto/howto-install-homebrew-python-opencv-osx-el-capitan/](http://seeb0h.github.io/howto/howto-install-homebrew-python-opencv-osx-el-capitan/).  
 
-To install on Windows, we recommend using [Anaconda](http://anaconda.org).  [These instructions](https://rivercitylabs.org/up-and-running-with-opencv3-and-python-3-anaconda-edition/) will walk you through the process.  
+To install on Windows, we recommend using [Anaconda](http://anaconda.org).  [These instructions](https://rivercitylabs.org/up-and-running-with-opencv3-and-python-3-anaconda-edition/) will walk you through the process.  Uee conda install -c menpo opencv to get the proper verison of opencv (3.4).
 
 In additon to OpenCV, you'll need tkinter and numpy installed.  Both of these can be installed via pip.
 
