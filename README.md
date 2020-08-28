@@ -6,7 +6,9 @@ LinearStitch uses SIFT to identify matches between the likely-overlap regions of
 
 ### Installation
 
-To run LinearStitch, you'll need to have Python3 installed. It is recommended to use pip for the rest of the installation.
+Install the most recent version of python 3, which you can find [here](https://www.python.org/downloads/).
+
+Install Zerene Stacker, which you can download from [here](https://zerenesystems.com/cms/stacker/softwaredownloads). It is recommended to use the default install folder.
 
 To install all python dependencies using pip, run
 
@@ -21,7 +23,5 @@ python LS_GUI.py
 ```
 
 tkinter is also required, but comes with most distributions of python. If it is missing you may install it using pip.
-
-You will also need to install Zerene Stacker, which you can download from [here](https://zerenesystems.com/cms/stacker/softwaredownloads).
 
 For more information on this software, please visit [labs.latis.umn.edu](http://labs.latis.umn.edu).
