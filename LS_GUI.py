@@ -12,6 +12,7 @@ import wx.lib.agw.multidirdialog as MDD
 import cv2
 import numpy
 import multiprocessing
+import shutil
 
 import sys
 from PyQt5.QtWidgets import (QFileDialog, QAbstractItemView, QListView,
@@ -60,6 +61,9 @@ class LinearStitch(wx.Frame):
 	ArchiveQueue = Queue()
 
 	def __init__(self, parent, title):
+		if not os.path.exists('./config.ini') and os.path.exists('./config.sample.ini'):
+			shutil.copy('./config.sample.ini', './config.ini')
+
 		self.config = configparser.ConfigParser()
 		self.config.read('config.ini')
 
@@ -406,8 +410,8 @@ class LinearStitch(wx.Frame):
 		output.write(populatedTemplate)
 		output.close();
 
-		ZereneInstall = self.config['Zerene']['Install']
-		ZereneLicense = self.config['Zerene']['License']
+		ZereneInstall = self.config['Zerene'].get('Install', '')
+		ZereneLicense = self.config['Zerene'].get('License', '')
 
 		ZereneLicense = ZereneLicense.replace('{{APPDATA}}', os.getenv('APPDATA'))
 

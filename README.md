@@ -11,3 +11,9 @@ To install on Windows, we recommend using [Anaconda](http://anaconda.org).  [The
 In additon to OpenCV, you'll need tkinter and numpy installed.  Both of these can be installed via pip.
 
 For more information on this software, please visit [labs.latis.umn.edu](http://labs.latis.umn.edu).
+
+### Configuration
+
+A sample config file is included: `config.sample.ini`. To start configuring LinearStitch immediately, you may rename `config.sample.ini` to `config.ini`, and update settings there. Most options are documented inside the config file. One option to consider is the ArchivePath, where zipped copies of image directories will be deposited after they are processed.
+
+Whenever `LS_GUI.py` is run, LinearStitch will check for a `config.ini` file. If there is no config, one will be created by copying `config.sample.ini`. This is simply a convenience for fresh installs. An existing `config.ini` will never be overridden.
