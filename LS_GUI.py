@@ -362,14 +362,18 @@ class LinearStitch(wx.Frame):
 
 	def archive(self, folder):
 
-		outputFile = os.path.basename(folder) + ".zip"
-		outputFilePath = os.path.join(self.config['General']['ArchivePath'], outputFile)
-		file_paths = self.get_all_file_paths(folder)
-		print("Zipping to: " + outputFilePath)
-		with ZipFile(outputFilePath,'w') as zip:
-		# writing each file one by one
-			for file in file_paths:
-				zip.write(file, os.path.relpath(file, os.path.join(folder, '..')))
+		ArchivePath = self.config['General']['ArchivePath']
+		if ArchivePath == 'NULL':
+			print('WARNING: Folder not archived. See Archive option in config.ini file.')
+		else:
+			outputFile = os.path.basename(folder) + ".zip"
+			outputFilePath = os.path.join(self.config['General']['ArchivePath'], outputFile)
+			file_paths = self.get_all_file_paths(folder)
+			print("Zipping to: " + outputFilePath)
+			with ZipFile(outputFilePath,'w') as zip:
+			# writing each file one by one
+				for file in file_paths:
+					zip.write(file, os.path.relpath(file, os.path.join(folder, '..')))
 
 	def startProcessing(self, event):
 
@@ -402,7 +406,20 @@ class LinearStitch(wx.Frame):
 		output.write(populatedTemplate)
 		output.close();
 
-		commandLine = self.config['Zerene']['LaunchPath'] + ' "' + xmlFile + '"'
+		ZereneInstall = self.config['Zerene']['Install']
+		ZereneLicense = self.config['Zerene']['License']
+
+		ZereneLicense = ZereneLicense.replace('{{APPDATA}}', os.getenv('APPDATA'))
+
+		if not ZereneInstall.endswith('/'):
+			ZereneInstall += '/'
+		if not ZereneLicense.endswith('/'):
+			ZereneLicense += '/'
+
+		commandLine = self.config['Zerene']['LaunchPath'] \
+			.replace('{{Install}}', ZereneInstall) \
+			.replace('{{License}}', ZereneLicense) \
+			.replace('{{script}}', xmlFile);
 
 		subprocess.call( commandLine, stdout=DEVNULL, stderr=subprocess.STDOUT)
 		self.StitchQueue.put(folder)
