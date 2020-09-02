@@ -1,6 +1,3 @@
-# Linear Stitch
-## An automated photo stitching tool by the UMN-LATIS team.
-
 Linear Stitch is a utility to automatically combine photos into a
 single larger image for analysis.
 
