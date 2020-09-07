@@ -172,8 +172,10 @@ class LinearStitch(wx.Frame):
 		sizer.Add(self.stackImages, 0, wx.ALL, 10)
 		sizer.Add(self.archiveImages, 0, wx.ALL, 10)
 		sizer.Add(button_horzSizer, 0, wx.ALL, 10)
-		panel.SetSizer(sizer)
+		panel.SetSizerAndFit(sizer)
 		panel.Layout()
+
+		self.SetSizerAndFit(sizer)
 
 		#event handling - button binded with functions
 		# self.Bind(wx.EVT_BUTTON, self.on_exit_button, exitbutton)
