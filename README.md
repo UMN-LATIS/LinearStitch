@@ -4,11 +4,25 @@ LinearStitch is a very simple image stitcher designed for images show in a singl
 
 LinearStitch uses SIFT to identify matches between the likely-overlap regions of two images.  It then directly concatenates those images together (without blending).  The goal is to ensure that the original images are undistorted, even if that means the stitch seam itself is imperfect.
 
-To run LinearStitch, you'll need to have Python3 and OpenCV 3, along with a few python dependencies.  For instructions for installtion Python3 and OpenCV3 on the Mac, visit [http://seeb0h.github.io/howto/howto-install-homebrew-python-opencv-osx-el-capitan/](http://seeb0h.github.io/howto/howto-install-homebrew-python-opencv-osx-el-capitan/).  
+### Installation
 
-To install on Windows, we recommend using [Anaconda](http://anaconda.org).  [These instructions](https://rivercitylabs.org/up-and-running-with-opencv3-and-python-3-anaconda-edition/) will walk you through the process.  Uee conda install -c menpo opencv to get the proper verison of opencv (3.4).
+Install the most recent version of python 3, which you can find [here](https://www.python.org/downloads/).
 
-In additon to OpenCV, you'll need tkinter and numpy installed.  Both of these can be installed via pip.
+Install Zerene Stacker, which you can download from [here](https://zerenesystems.com/cms/stacker/softwaredownloads). It is recommended to use the default install folder.
+
+To install all python dependencies using pip, run
+
+```shell
+pip install -r requirements.txt
+```
+
+You may then run the LinearStitch application using
+
+```shell
+python LS_GUI.py
+```
+
+tkinter is also required, but comes with most distributions of python. If it is missing you may install it using pip.
 
 For more information on this software, please visit [labs.latis.umn.edu](http://labs.latis.umn.edu).
 
