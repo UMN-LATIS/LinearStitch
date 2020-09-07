@@ -14,7 +14,12 @@ import numpy
 import multiprocessing
 import shutil
 
-import sys
+# required by pyinstaller
+import pkg_resources.py2_warn
+
+if __name__ == "__main__":
+	multiprocessing.freeze_support()
+
 from PyQt5.QtWidgets import (QFileDialog, QAbstractItemView, QListView,
 							 QTreeView, QApplication, QDialog)
 
