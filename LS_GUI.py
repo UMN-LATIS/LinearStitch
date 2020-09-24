@@ -13,6 +13,7 @@ import cv2
 import numpy
 import multiprocessing
 import shutil
+import sys
 
 # required by pyinstaller
 import pkg_resources.py2_warn
