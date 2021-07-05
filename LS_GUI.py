@@ -14,6 +14,8 @@ import numpy
 import multiprocessing
 import shutil
 import sys
+from imutils import paths
+from pathlib import Path
 
 # required by pyinstaller
 import pkg_resources.py2_warn
@@ -62,6 +64,7 @@ class LinearStitch(wx.Frame):
 	progressGauge = None
 
 	ScanQueue = Queue()
+	FocusQueue = Queue()
 	StitchQueue = Queue()
 	StackQueue = Queue()
 	ArchiveQueue = Queue()
@@ -75,6 +78,11 @@ class LinearStitch(wx.Frame):
 
 		for w in range(int(self.config['Processing']['CoreCount'])):
 			t = threading.Thread(target=self.scanWorker, name='worker-%s' % w)
+			t.daemon = True
+			t.start()
+
+		for w in range(int(self.config['Processing']['CoreCount'])):
+			t = threading.Thread(target=self.focusWorker, name='worker-%s' % w)
 			t.daemon = True
 			t.start()
 
@@ -155,10 +163,12 @@ class LinearStitch(wx.Frame):
 
 		button_horzSizer = wx.BoxSizer( wx.HORIZONTAL )
 		scanForProblems = wx.Button(panel, label = "Scan for Problems")
+		removeBlurryImages = wx.Button(panel, label = "Remove Blurry Images")
 		startProcessing = wx.Button(panel, label = "Start Processing")
 		self.progressGauge = wx.Gauge(panel, range=100, style=wx.GA_HORIZONTAL, size = (100, -1));
 
 		button_horzSizer.Add(scanForProblems, 0, wx.ALL, 10);
+		button_horzSizer.Add(removeBlurryImages, 0, wx.ALL, 10);
 		button_horzSizer.Add(startProcessing, 0, wx.ALL, 10);
 		button_horzSizer.Add(self.progressGauge, 0, wx.ALL, 10)
 		self.progressGauge.Hide();
@@ -190,6 +200,7 @@ class LinearStitch(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.on_del_button, delbutton)
 		self.Bind(wx.EVT_BUTTON, self.on_scale_button, selectScale)
 		self.Bind(wx.EVT_BUTTON, self.scanForProblems, scanForProblems)
+		self.Bind(wx.EVT_BUTTON, self.removeBlurryImages, removeBlurryImages)
 		self.Bind(wx.EVT_BUTTON, self.startProcessing, startProcessing)
 
 		#event handling - close app with "x" button located in corner
@@ -261,6 +272,20 @@ class LinearStitch(wx.Frame):
 			# self.scanCore(folder)
 			self.ScanQueue.put(folder)
 
+	def scanWorker(self):
+		while True:
+			if not self.ScanQueue.empty():
+				folder = self.ScanQueue.get()
+				self.scanCore(folder)
+				self.ScanQueue.task_done()
+			time.sleep(1)
+
+	def removeBlurryImages(self, event):
+		print("Starting Blurry Image Removal")
+		for folder in self.cont.GetStrings():
+			# self.scanCore(folder)
+			self.FocusQueue.put(folder)
+
 	def scanCore(self, folder):
 		childrenCores = [f for f in os.listdir(folder) if isdir(join(folder, f))]
 		childrenCores.sort()
@@ -325,13 +350,54 @@ class LinearStitch(wx.Frame):
 
 		return problemFiles, fileCount
 
-	def scanWorker(self):
+	def focusWorker(self):
 		while True:
-			if not self.ScanQueue.empty():
-				folder = self.ScanQueue.get()
-				self.scanCore(folder)
-				self.ScanQueue.task_done()
+			if not self.FocusQueue.empty():
+				folder = self.FocusQueue.get()
+				self.focusCore(folder)
+				self.FocusQueue.task_done()
 			time.sleep(1)
+	
+	def focusCore(self, folder):
+		childrenCores = [f for f in os.listdir(folder) if isdir(join(folder, f))]
+		childrenCores.sort()
+		fileCountList = [];
+		outputText = ""
+		outputText += "Cleaning blurry images in: " + folder + "\n"
+		outputText += "------------------------------------" + "\n"
+		for core in childrenCores:
+			fileCount = 0
+			self.focusFolder(folder + "/" + core)
+
+	def echo(self, text):
+		print(text)
+
+
+	def focusFolder(self, path):
+		for imagePath in sorted(paths.list_images(path)):
+        # load the image, convert it to grayscale, and compute the
+        # focus measure of the image using the Variance of Laplacian
+        # method
+			image = cv2.imread(imagePath)
+			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+			fm = self.variance_of_laplacian(gray)
+
+			if fm > float(self.config['Processing']['FocusThreshold']):
+				text = imagePath+" - Not Blurry: "+str(fm)
+				self.echo(imagePath+" - Not Blurry: "+str(fm))
+		
+			# if the focus measure is less than the supplied threshold,
+			# then the image should be considered "blurry"
+			if fm < float(self.config['Processing']['FocusThreshold']):
+				text = imagePath+" - Blurry: "+str(fm)
+				self.echo(imagePath+" - Blurry: "+str(fm))
+				os.remove(imagePath)
+
+	def variance_of_laplacian(self,image):
+		# compute the Laplacian of the image and then return the focus
+		# measure, which is simply the variance of the Laplacian
+		return cv2.Laplacian(image, cv2.CV_64F).var()
+
 
 	def stitchWorker(self):
 		while True:
