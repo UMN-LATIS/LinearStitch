@@ -391,7 +391,7 @@ class LinearStitch(wx.Frame):
 			if fm < float(self.config['Processing']['FocusThreshold']):
 				text = imagePath+" - Blurry: "+str(fm)
 				self.echo(imagePath+" - Blurry: "+str(fm))
-				os.remove(imagePath)
+				os.rename(imagePath, imagePath + "_blurry")
 
 	def variance_of_laplacian(self,image):
 		# compute the Laplacian of the image and then return the focus
