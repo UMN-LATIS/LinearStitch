@@ -18,7 +18,7 @@ from imutils import paths
 from pathlib import Path
 
 # required by pyinstaller
-import pkg_resources.py2_warn
+#import pkg_resources.py2_warn
 
 if __name__ == "__main__":
 	multiprocessing.freeze_support()
@@ -283,8 +283,7 @@ class LinearStitch(wx.Frame):
 	def removeBlurryImages(self, event):
 		print("Starting Blurry Image Removal")
 		for folder in self.cont.GetStrings():
-			# self.scanCore(folder)
-			self.FocusQueue.put(folder)
+			self.focusCore(folder)
 
 	def scanCore(self, folder):
 		childrenCores = [f for f in os.listdir(folder) if isdir(join(folder, f))]
@@ -354,8 +353,7 @@ class LinearStitch(wx.Frame):
 		while True:
 			if not self.FocusQueue.empty():
 				folder = self.FocusQueue.get()
-				self.focusCore(folder)
-				self.FocusQueue.task_done()
+				self.focusFolder(folder)
 			time.sleep(1)
 	
 	def focusCore(self, folder):
@@ -366,8 +364,7 @@ class LinearStitch(wx.Frame):
 		outputText += "Cleaning blurry images in: " + folder + "\n"
 		outputText += "------------------------------------" + "\n"
 		for core in childrenCores:
-			fileCount = 0
-			self.focusFolder(folder + "/" + core)
+			self.FocusQueue.put(folder + "/" + core)
 
 	def echo(self, text):
 		print(text)
