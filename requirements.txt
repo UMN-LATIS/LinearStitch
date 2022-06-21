@@ -4,7 +4,7 @@ Cython==0.29.21
 kiwisolver==1.2.0
 matplotlib==3.3.1
 menpo==0.10.0
-numpy==1.20.3
+numpy==1.22.0
 opencv-contrib-python==4.4.0.46
 Pillow==7.2.0
 pyparsing==2.4.7
