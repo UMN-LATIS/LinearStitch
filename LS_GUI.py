@@ -175,8 +175,13 @@ class LinearStitch(wx.Frame):
 
 		self.maskBox = wx.CheckBox(panel, label="Mask Images")
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
-		self.stackImages = wx.CheckBox(panel, label="Stack Images")
-		self.stackImages.SetValue(True)
+
+		stackList = ['Don\'t Stack Images',
+                    'Stack Images (Zerene)', 'Stack Images (FocusStack']
+		self.stackImages = wx.RadioBox(panel, label='Focus Stacking', pos=(80, 10), choices=stackList,
+                                 majorDimension=1, style=wx.RA_SPECIFY_COLS)
+		self.stackImages.SetSelection(1)
+
 
 		self.archiveImages = wx.CheckBox(panel, label="Archive Images")
 		self.archiveImages.SetValue(True)
@@ -408,7 +413,10 @@ class LinearStitch(wx.Frame):
 		while True:
 			if not self.StackQueue.empty():
 				folder = self.StackQueue.get()
-				self.stack(folder)
+				if(self.stackImages.GetSelection() == 1):
+					self.stackZerene(folder)
+				elif(self.stackImages.GetSelection() == 2):
+					self.stackFocusStack(folder)
 				self.StackQueue.task_done()
 			time.sleep(1)
 
@@ -458,12 +466,12 @@ class LinearStitch(wx.Frame):
 			onlyFiles = [f for f in os.listdir(folder) if isfile(join(folder, f))]
 			print(onlyFiles)
 			print(folder)
-			if(self.stackImages.IsChecked()):
+			if(self.stackImages.GetSelection() > 0):
 				self.StackQueue.put(folder)
 			else:
 				self.StitchQueue.put(folder)
 
-	def stack(self, folder):
+	def stackZerene(self, folder):
 
 		onlyFolders = [f for f in os.listdir(folder) if isdir(join(folder, f))]
 		onlyFolders.sort()
@@ -471,7 +479,8 @@ class LinearStitch(wx.Frame):
 		for stackFolder in onlyFolders:
 			sourceString += '<Source value="' + folder + "/" + stackFolder + '"/>\n'
 
-		substitutionDict = { 'batchLength': len(onlyFolders), 'sourceFiles': sourceString, 'outputPath': folder +"/" }
+		substitutionDict = {'batchLength': len(
+			onlyFolders), 'sourceFiles': sourceString, 'outputPath': self.config['General']['CoreOutputPath'] + "/"}
 		template = open( self.config['Zerene']['TemplateFile'] )
 		src = Template( template.read() )
 		populatedTemplate = src.substitute(substitutionDict)
@@ -497,6 +506,22 @@ class LinearStitch(wx.Frame):
 			.replace('{{script}}', xmlFile);
 
 		subprocess.call( commandLine, stdout=DEVNULL, stderr=subprocess.STDOUT)
+		self.StitchQueue.put(folder)
+
+	def stackFocusStack(self, folder):
+
+		onlyFolders = [f for f in os.listdir(folder) if isdir(join(folder, f))]
+		onlyFolders.sort()
+		for stackFolder in onlyFolders:
+
+			focusStackInstall = self.config['FocusStack'].get('Install', '')
+			commandLine = self.config['FocusStack']['LaunchPath'] \
+                            .replace('{{Install}}', focusStackInstall) \
+                            .replace('{{folderPath}}', folder + "/" + stackFolder) \
+                            .replace('{{outputPath}}', self.config['General']['CoreOutputPath'] + "/" + stackFolder + ".jpg")
+
+			subprocess.call(commandLine, stdout=DEVNULL,
+			                stderr=subprocess.STDOUT, shell=True)
 		self.StitchQueue.put(folder)
 
 	def stitchFolder(self, targetFolder):
