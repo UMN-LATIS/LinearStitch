@@ -178,7 +178,7 @@ class LinearStitch(wx.Frame):
 		self.stackImages = wx.CheckBox(panel, label="Stack Images")
 		self.stackImages.SetValue(True)
 
-		self.archiveImages = wx.CheckBox(panel, label="Achive Images")
+		self.archiveImages = wx.CheckBox(panel, label="Archive Images")
 		self.archiveImages.SetValue(True)
 
 		sizer.Add(panelCtrls_horzSizer)
