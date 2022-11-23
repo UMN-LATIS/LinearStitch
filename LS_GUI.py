@@ -480,7 +480,7 @@ class LinearStitch(wx.Frame):
 			sourceString += '<Source value="' + folder + "/" + stackFolder + '"/>\n'
 
 		substitutionDict = {'batchLength': len(
-			onlyFolders), 'sourceFiles': sourceString, 'outputPath': self.config['General']['CoreOutputPath'] + "/"}
+			onlyFolders), 'sourceFiles': sourceString, 'outputPath': folder + "/"}
 		template = open( self.config['Zerene']['TemplateFile'] )
 		src = Template( template.read() )
 		populatedTemplate = src.substitute(substitutionDict)
@@ -518,7 +518,7 @@ class LinearStitch(wx.Frame):
 			commandLine = self.config['FocusStack']['LaunchPath'] \
                             .replace('{{Install}}', focusStackInstall) \
                             .replace('{{folderPath}}', folder + "/" + stackFolder) \
-                            .replace('{{outputPath}}', self.config['General']['CoreOutputPath'] + "/" + stackFolder + ".jpg")
+                            .replace('{{outputPath}}', folder + "/" + stackFolder + ".jpg")
 
 			subprocess.call(commandLine, stdout=DEVNULL,
 			                stderr=subprocess.STDOUT, shell=True)
@@ -547,6 +547,7 @@ class LinearStitch(wx.Frame):
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
 		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked())
 		
+		shutil.copy(outputFile, self.config['General']['CoreOutputPath'])
 		if(self.archiveImages.IsChecked()):
 			self.ArchiveQueue.put(targetFolder)
 
