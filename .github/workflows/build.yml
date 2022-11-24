@@ -82,7 +82,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        path: linearstitch/dist/*
+        path: dist/*
         name: LinearStitch ${{ matrix.os }} binary
   release:
     needs: [build]
@@ -96,8 +96,8 @@ jobs:
       
       - name: Download artifacts
         run: |
-          mkdir -p linearstitch/dist
-          cd linearstitch/dist
+          mkdir -p dist
+          cd dist
           gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch macos-latest application'
           gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch windows-latest binary'
         env:
@@ -105,17 +105,13 @@ jobs:
       
       - name: List artifacts
         run: |
-          find linearstitch/dist
+          find dist
       
       - name: Upload to latest release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: github.ref == 'refs/heads/master'
         run: |
-          cd linearstitch
-          git tag -d latest
-          git tag latest
-          git push origin --force latest
           cd dist
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
           gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest *
