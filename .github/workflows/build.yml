@@ -82,8 +82,8 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        path: focus-stack/dist/*
-        name: Focus-stack ${{ matrix.os }} binary
+        path: linearstitch/dist/*
+        name: LinearStitch ${{ matrix.os }} binary
   release:
     needs: [build]
     runs-on: ubuntu-20.04
@@ -98,8 +98,8 @@ jobs:
         run: |
           mkdir -p linearstitch/dist
           cd linearstitch/dist
-          gh run --repo ${GITHUB_REPOSITORY} download -n 'Focus-stack macos-latest application'
-          gh run --repo ${GITHUB_REPOSITORY} download -n 'Focus-stack windows-latest binary'
+          gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch macos-latest application'
+          gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch windows-latest binary'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
