@@ -51,7 +51,7 @@ from zipfile import ZipFile
 class LinearStitch(wx.Frame):
 
 	# Our normal wxApp-derived class, as usual
-	app = wx.App(0)
+	# app = wx.App(0)
 	config = None
 
 	#setup listbox list as global var
@@ -177,7 +177,7 @@ class LinearStitch(wx.Frame):
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 
 		stackList = ['Don\'t Stack Images',
-                    'Stack Images (Zerene)', 'Stack Images (FocusStack']
+                    'Stack Images (Zerene)', 'Stack Images (FocusStack)']
 		self.stackImages = wx.RadioBox(panel, label='Focus Stacking', pos=(80, 10), choices=stackList,
                                  majorDimension=1, style=wx.RA_SPECIFY_COLS)
 		self.stackImages.SetSelection(1)
@@ -196,7 +196,9 @@ class LinearStitch(wx.Frame):
 		panel.SetSizerAndFit(sizer)
 		panel.Layout()
 
-		self.SetSizerAndFit(sizer)
+		sizer2 = wx.BoxSizer(wx.VERTICAL)
+		sizer2.Add(panel, 1, wx.EXPAND)
+		self.SetSizerAndFit(sizer2)
 
 		#event handling - button binded with functions
 		# self.Bind(wx.EVT_BUTTON, self.on_exit_button, exitbutton)
@@ -519,7 +521,7 @@ class LinearStitch(wx.Frame):
                             .replace('{{Install}}', focusStackInstall) \
                             .replace('{{folderPath}}', folder + "/" + stackFolder) \
                             .replace('{{outputPath}}', folder + "/" + stackFolder + ".jpg")
-
+			
 			subprocess.call(commandLine, stdout=DEVNULL,
 			                stderr=subprocess.STDOUT, shell=True)
 		self.StitchQueue.put(folder)
@@ -592,10 +594,9 @@ class MyApp(wx.App):
 	def OnInit(self):
 		frame = LinearStitch(None, "Linear Stitch")
 		self.SetTopWindow(frame)
-
-
 		frame.Show(True)
 		return True
+
 if __name__ == '__main__':    
 	qapp = QApplication(sys.argv)
 	app = MyApp(redirect=True)
