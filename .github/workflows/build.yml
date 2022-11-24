@@ -66,6 +66,8 @@ jobs:
             OUT_FILE_NAME: LinearStitch.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
+    - run: echo "HELLO"
+    - run: echo $GITHUB_REPOSITORY
     - uses: actions/checkout@v1
     - name: Set up Python 3.9
       uses: actions/setup-python@v2
