@@ -55,14 +55,15 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-                pyinstaller -F -w -n LinearStitch LS_GUI.py &&
+                pyinstaller -w -n LinearStitch LS_GUI.py &&
                 cd dist/ &&
                 zip -r9 LinearStitch LinearStitch.app/
             OUT_FILE_NAME: LinearStitch.zip
             ASSET_MIME: application/zip
           - os: windows-latest
+            ARCH: x64
             TARGET: windows
-            CMD_BUILD: pyinstaller -F -w -n LinearStitch LS_GUI.py
+            CMD_BUILD: pyinstaller -w -n LinearStitch LS_GUI.py
             OUT_FILE_NAME: LinearStitch.exe
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
