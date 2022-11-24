@@ -79,32 +79,43 @@ jobs:
         pip install -r requirements.txt
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
-    - name: Upload to latest release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      if: github.ref == 'refs/heads/master'
-      run: |
-        cd dist
-        gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-        gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest ${{ matrix.OUT_FILE_NAME}}
-
-    # - name: Load Release URL File from release job
-    #   uses: actions/download-artifact@v1
-    #   with:
-    #     name: release_url
-    # - name: Get Release File Name & Upload URL
-    #   id: get_release_info
-    #   shell: bash
-    #   run: |
-    #     value=`cat release_url/release_url.txt`
-    #     echo ::set-output name=upload_url::$value
-    # - name: Upload Release Asset
-    #   id: upload-release-asset
-    #   uses: actions/upload-release-asset@v1
-    #   env:
-    #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    #   with:
-    #     upload_url: ${{ steps.get_release_info.outputs.upload_url }}
-    #     asset_path: ./dist/${{ matrix.OUT_FILE_NAME}}
-    #     asset_name: ${{ matrix.OUT_FILE_NAME}}
-    #     asset_content_type: ${{ matrix.ASSET_MIME}}
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        path: focus-stack/dist/*
+        name: Focus-stack ${{ matrix.os }} binary
+  release:
+    needs: [build]
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Check out code from GitHub
+        uses: actions/checkout@v2
+        with:
+          path: linearstitch
+          fetch-depth: "0"
+      
+      - name: Download artifacts
+        run: |
+          mkdir -p linearstitch/dist
+          cd linearstitch/dist
+          gh run --repo ${GITHUB_REPOSITORY} download -n 'Focus-stack macos-latest application'
+          gh run --repo ${GITHUB_REPOSITORY} download -n 'Focus-stack windows-latest binary'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: List artifacts
+        run: |
+          find linearstitch/dist
+      
+      - name: Upload to latest release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.ref == 'refs/heads/master'
+        run: |
+          cd linearstitch
+          git tag -d latest
+          git tag latest
+          git push origin --force latest
+          cd dist
+          gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest *
