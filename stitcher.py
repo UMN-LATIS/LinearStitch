@@ -31,7 +31,7 @@ class Stitcher:
             mask = None;
 
         # Find SIFT keypoints and descriptors
-        sift = cv2.xfeatures2d.SIFT_create(nfeatures=CONFIG['max_features'])
+        sift = cv2.SIFT_create(nfeatures=CONFIG['max_features'])
         self.logMessage('\t- Finding keypoints and descriptors for image 1')
         kp1, des1 = sift.detectAndCompute(i1, mask)
         self.logMessage('\t- Finding keypoints and descriptors for image 2')

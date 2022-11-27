@@ -29,7 +29,7 @@ class TwoDStitcher:
             i2 = cv2.cvtColor(cv2.resize(img2[:, :int(overlap_px), :], (0, 0), fx=CONFIG['scale_factor'], fy=CONFIG['scale_factor']), cv2.COLOR_BGR2GRAY)
 
         # Find SIFT keypoints and descriptors
-        sift = cv2.xfeatures2d.SIFT_create(nfeatures=CONFIG['max_features'])
+        sift = cv2.SIFT_create(nfeatures=CONFIG['max_features'])
         print('\t- Finding keypoints and descriptors for image 1')
         kp1, des1 = sift.detectAndCompute(i1, None)
         print('\t- Finding keypoints and descriptors for image 2')
