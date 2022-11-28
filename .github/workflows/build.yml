@@ -63,8 +63,8 @@ jobs:
           - os: windows-latest
             ARCH: x64
             TARGET: windows
-            CMD_BUILD: pyinstaller -w -n LinearStitch LS_GUI.py
-            OUT_FILE_NAME: LinearStitch.exe
+            CMD_BUILD: pyinstaller -w -n LinearStitch LS_GUI.pynp
+            OUT_FILE_NAME: LinearStitch
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - run: echo "HELLO"
