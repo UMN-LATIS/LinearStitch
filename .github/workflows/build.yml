@@ -118,4 +118,5 @@ jobs:
         run: |
           cd dist
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest *zip
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest LinearStitchMac.zip
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest LinearStitchWindows.zip
