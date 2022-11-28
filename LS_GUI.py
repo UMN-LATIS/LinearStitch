@@ -37,7 +37,7 @@ from subprocess import DEVNULL, STDOUT, check_call
 
 import statistics
 
-import configparser
+from config import LSConfig;
 
 from string import Template
 
@@ -46,13 +46,14 @@ from queue import Queue
 
 import time
 
+from Preferences import PreferencesEditor;
+
 from zipfile import ZipFile
 
 class LinearStitch(wx.Frame):
 
 	# Our normal wxApp-derived class, as usual
 	# app = wx.App(0)
-	config = None
 
 	#setup listbox list as global var
 	init_list = []
@@ -70,18 +71,15 @@ class LinearStitch(wx.Frame):
 	ArchiveQueue = Queue()
 
 	def __init__(self, parent, title):
-		if not os.path.exists('./config.ini') and os.path.exists('./config.sample.ini'):
-			shutil.copy('./config.sample.ini', './config.ini')
+		
+		self.config = LSConfig()
 
-		self.config = configparser.ConfigParser()
-		self.config.read('config.ini')
-
-		for w in range(int(self.config['Processing']['CoreCount'])):
+		for w in range(int(self.config.configValues["CoreCount"])):
 			t = threading.Thread(target=self.scanWorker, name='worker-%s' % w)
 			t.daemon = True
 			t.start()
 
-		for w in range(int(self.config['Processing']['CoreCount'])):
+		for w in range(int(self.config.configValues["CoreCount"])):
 			t = threading.Thread(target=self.focusWorker, name='worker-%s' % w)
 			t.daemon = True
 			t.start()
@@ -165,8 +163,10 @@ class LinearStitch(wx.Frame):
 		scanForProblems = wx.Button(panel, label = "Scan for Problems")
 		removeBlurryImages = wx.Button(panel, label = "Remove Blurry Images")
 		startProcessing = wx.Button(panel, label = "Start Processing")
+		showPrefsButton = wx.Button(panel, label = "Prefs")
 		self.progressGauge = wx.Gauge(panel, range=100, style=wx.GA_HORIZONTAL, size = (100, -1));
 
+		button_horzSizer.Add(showPrefsButton, 0, wx.ALL, 10);
 		button_horzSizer.Add(scanForProblems, 0, wx.ALL, 10);
 		button_horzSizer.Add(removeBlurryImages, 0, wx.ALL, 10);
 		button_horzSizer.Add(startProcessing, 0, wx.ALL, 10);
@@ -209,11 +209,16 @@ class LinearStitch(wx.Frame):
 		self.Bind(wx.EVT_BUTTON, self.scanForProblems, scanForProblems)
 		self.Bind(wx.EVT_BUTTON, self.removeBlurryImages, removeBlurryImages)
 		self.Bind(wx.EVT_BUTTON, self.startProcessing, startProcessing)
+		self.Bind(wx.EVT_BUTTON, self.showPrefs, showPrefsButton)
 
 		#event handling - close app with "x" button located in corner
 		self.Bind(wx.EVT_CLOSE, self.on_exit_button)
 
 		self.pool=multiprocessing.Pool()
+
+	def showPrefs(self, event):
+		self.prefs = PreferencesEditor(self.config)
+		self.prefs.Show(self)
 
 	def AddLinearSpacer( self, boxsizer, pixelSpacing ) :
 		""" A one-dimensional spacer along only the major axis for any BoxSizer """
@@ -238,7 +243,7 @@ class LinearStitch(wx.Frame):
 
 	def on_scale_button(self, event):
 		dlg = getExistingFiles()
-		dlg.setDirectory(self.config['General']['BrowsePath'])
+		dlg.setDirectory(self.config.configValues["BrowsePath"])
 		if dlg.exec_() == QDialog.Accepted:
 			selectedFiles = dlg.selectedFiles()
 			self.scalePath = selectedFiles[0]
@@ -269,7 +274,7 @@ class LinearStitch(wx.Frame):
 	#obtains path for selected directory to be added to the listbox
 	def selectFolders(self):
 		dlg = getExistingDirectories()
-		dlg.setDirectory(self.config['General']['BrowsePath'])
+		dlg.setDirectory(self.config.configValues["BrowsePath"])
 		if dlg.exec_() == QDialog.Accepted:
 			self.cont.InsertItems(dlg.selectedFiles(), 0)
 
@@ -386,13 +391,13 @@ class LinearStitch(wx.Frame):
 			gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 			fm = self.variance_of_laplacian(gray)
 
-			if fm > float(self.config['Processing']['FocusThreshold']):
+			if fm > float(self.config.configValues["FocusThreshold"]):
 				text = imagePath+" - Not Blurry: "+str(fm)
 				self.echo(imagePath+" - Not Blurry: "+str(fm))
 		
 			# if the focus measure is less than the supplied threshold,
 			# then the image should be considered "blurry"
-			if fm < float(self.config['Processing']['FocusThreshold']):
+			if fm < float(self.config.configValues["FocusThreshold"]):
 				text = imagePath+" - Blurry: "+str(fm)
 				self.echo(imagePath+" - Blurry: "+str(fm))
 				os.rename(imagePath, imagePath + "_blurry")
@@ -447,12 +452,12 @@ class LinearStitch(wx.Frame):
 
 	def archive(self, folder):
 
-		ArchivePath = self.config['General']['ArchivePath']
+		ArchivePath = self.config.configValues["ArchivePath"]
 		if ArchivePath == 'NULL':
 			print('WARNING: Folder not archived. See Archive option in config.ini file.')
 		else:
 			outputFile = os.path.basename(folder) + ".zip"
-			outputFilePath = os.path.join(self.config['General']['ArchivePath'], outputFile)
+			outputFilePath = os.path.join(self.config.configValues["ArchivePath"], outputFile)
 			file_paths = self.get_all_file_paths(folder)
 			print("Zipping to: " + outputFilePath)
 			with ZipFile(outputFilePath,'w') as zip:
@@ -483,7 +488,7 @@ class LinearStitch(wx.Frame):
 
 		substitutionDict = {'batchLength': len(
 			onlyFolders), 'sourceFiles': sourceString, 'outputPath': folder + "/"}
-		template = open( self.config['Zerene']['TemplateFile'] )
+		template = open( self.config.configValues["ZereneTemplate"] )
 		src = Template( template.read() )
 		populatedTemplate = src.substitute(substitutionDict)
 
@@ -492,8 +497,8 @@ class LinearStitch(wx.Frame):
 		output.write(populatedTemplate)
 		output.close();
 
-		ZereneInstall = self.config['Zerene'].get('Install', '')
-		ZereneLicense = self.config['Zerene'].get('License', '')
+		ZereneInstall = self.config.configValues["ZereneInstall"]
+		ZereneLicense = self.config.configValues["ZereneLicense"]
 
 		ZereneLicense = ZereneLicense.replace('{{APPDATA}}', os.getenv('APPDATA'))
 
@@ -502,7 +507,7 @@ class LinearStitch(wx.Frame):
 		if not ZereneLicense.endswith('/'):
 			ZereneLicense += '/'
 
-		commandLine = self.config['Zerene']['LaunchPath'] \
+		commandLine = self.config.configValues["LaunchPath"] \
 			.replace('{{Install}}', ZereneInstall) \
 			.replace('{{License}}', ZereneLicense) \
 			.replace('{{script}}', xmlFile);
@@ -516,12 +521,13 @@ class LinearStitch(wx.Frame):
 		onlyFolders.sort()
 		for stackFolder in onlyFolders:
 
-			focusStackInstall = self.config['FocusStack'].get('Install', '')
-			commandLine = self.config['FocusStack']['LaunchPath'] \
+			focusStackInstall = self.config.configValues["FocusStackInstall"]
+			
+			commandLine = self.config.configValues["FocusStackLaunchPath"] \
                             .replace('{{Install}}', focusStackInstall) \
                             .replace('{{folderPath}}', folder + "/" + stackFolder) \
                             .replace('{{outputPath}}', folder + "/" + stackFolder + ".jpg")
-			
+			print(commandLine);
 			subprocess.call(commandLine, stdout=DEVNULL,
 			                stderr=subprocess.STDOUT, shell=True)
 		self.StitchQueue.put(folder)
@@ -549,7 +555,7 @@ class LinearStitch(wx.Frame):
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
 		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked())
 		
-		shutil.copy(outputFile, self.config['General']['CoreOutputPath'])
+		shutil.copy(outputFile, self.config.configValues["CoreOutputPath"])
 		if(self.archiveImages.IsChecked()):
 			self.ArchiveQueue.put(targetFolder)
 
