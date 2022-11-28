@@ -102,7 +102,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         if: github.ref == 'refs/heads/master'
         run: |
-          cd dist
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/*"
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-latest binary/*"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/LinearStitchWindows.zip"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-latest binary/LinearStitchMac.zip"
