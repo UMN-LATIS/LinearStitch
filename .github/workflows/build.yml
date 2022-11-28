@@ -83,7 +83,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        path: dist/*
+        path: dist/${{matrix.OUT_FILE_NAME}}
         name: LinearStitch ${{ matrix.os }} binary
   release:
     needs: [build]
