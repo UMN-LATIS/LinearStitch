@@ -57,8 +57,8 @@ jobs:
             CMD_BUILD: >
                 pyinstaller -w -n LinearStitch LS_GUI.py &&
                 cd dist/ &&
-                zip -r9 LinearStitch LinearStitch.app/
-            OUT_FILE_NAME: LinearStitch.zip
+                zip -r9 LinearStitchMac LinearStitch.app/
+            OUT_FILE_NAME: LinearStitchMac.zip
             ASSET_MIME: application/zip
           - os: windows-latest
             ARCH: x64
@@ -66,8 +66,8 @@ jobs:
             CMD_BUILD: > 
               pyinstaller -w -n LinearStitch LS_GUI.py &&
               cd dist/ &&
-              7z a LinearStitch.zip -r *
-            OUT_FILE_NAME: LinearStitch.zip
+              7z a LinearStitchWindows.zip -r *
+            OUT_FILE_NAME: LinearStitchWindows.zip
             ASSET_MIME: application/vnd.microsoft.portable-executable
     steps:
     - run: echo "HELLO"
