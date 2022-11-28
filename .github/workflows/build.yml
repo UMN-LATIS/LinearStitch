@@ -64,8 +64,8 @@ jobs:
             ARCH: x64
             TARGET: windows
             CMD_BUILD: > 
-              pyinstaller -w -n LinearStitch LS_GUI.py
-              cd dist/ **
+              pyinstaller -w -n LinearStitch LS_GUI.py &&
+              cd dist/ &&
               zip -r9 LinearStitch *
             OUT_FILE_NAME: LinearStitch.zip
             ASSET_MIME: application/vnd.microsoft.portable-executable
