@@ -102,8 +102,8 @@ jobs:
         run: |
           mkdir -p dist
           cd dist
-          gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch macos-latest binary'
-          gh run --repo ${GITHUB_REPOSITORY} download -n 'LinearStitch windows-latest binary'
+          gh run --repo ${GITHUB_REPOSITORY} download ${{ github.run_id }} -n 'LinearStitch macos-latest binary'
+          gh run --repo ${GITHUB_REPOSITORY} download ${{ github.run_id }} -n 'LinearStitch windows-latest binary'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
