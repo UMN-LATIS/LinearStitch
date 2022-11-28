@@ -92,25 +92,11 @@ jobs:
     needs: [build]
     runs-on: ubuntu-20.04
     steps:
-      - name: Check out code from GitHub
-        uses: actions/checkout@v2
-        with:
-          path: linearstitch
-          fetch-depth: "0"
-      
-      - name: Download artifacts
-        run: |
-          mkdir -p dist
-          cd dist
-          gh run --repo ${GITHUB_REPOSITORY} download ${{ github.run_id }} -n 'LinearStitch macos-latest binary'
-          gh run --repo ${GITHUB_REPOSITORY} download ${{ github.run_id }} -n 'LinearStitch windows-latest binary'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
+      - name: Download
+        uses: actions/download-artifact@v3
       - name: List artifacts
         run: |
-          find dist
-      
+          find 
       - name: Upload to latest release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,5 +104,5 @@ jobs:
         run: |
           cd dist
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest LinearStitchMac.zip
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest LinearStitchWindows.zip
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/*"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-latest binary/*"
