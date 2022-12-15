@@ -18,3 +18,4 @@ attrdict==2.0.1
 wxPython==4.2.0
 imutils==0.5.4
 appdirs==1.4.4
+pyopencl==2022.3
