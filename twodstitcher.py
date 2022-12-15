@@ -119,9 +119,10 @@ class TwoDStitcher:
 
             print("Stitching Image {} and {}".format(i, i + 1))
             composite = self.stitch_images(img1, img2,orientation)
+            print("SIZE OF COMPOSITE: {}".format(composite.shape))
             if(callback):
                 callback(1, round(i / len(images) * 100));
-
+        
         cv2.imwrite(outputPath, composite)
         if(callback):
             callback(1, 100);

@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import os
 import platform
+import pyopencl as cl
 
 CONFIG={}
 CONFIG['overlap'] = 0.35
@@ -95,7 +96,43 @@ class Stitcher:
         print(message)
 
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore):
+    def removeVignette(self, img):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # apply the vignette correction algorithm using OpenCL
+        rows, cols = gray.shape
+        center = (cols//2, rows//2)
+        mask = np.zeros(gray.shape, dtype=np.float32)
+
+        # define an OpenCL kernel that computes the mask for a given row
+        mask_kernel = '''
+        __kernel void compute_mask(__global float *mask, int rows, int cols, int center_x, int center_y)
+        {
+            int row = get_global_id(1);
+            int col = get_global_id(0);
+            if (row < rows && col < cols)
+                mask[row * cols + col] = 1 + 1.1*(pow((float)(row - center_y), 2) + pow((float)(col - center_x), 2))/(rows*rows + cols*cols);
+        }
+        '''
+
+        # create an OpenCL context and queue
+        ctx = cl.create_some_context()
+        queue = cl.CommandQueue(ctx)
+
+        # create an OpenCL buffer for the mask
+        mask_buf = cl.Buffer(ctx, cl.mem_flags.WRITE_ONLY, mask.nbytes)
+
+        # compile and run the OpenCL kernel
+        prg = cl.Program(ctx, mask_kernel).build()
+        prg.compute_mask(queue, (cols, rows), None, mask_buf, np.int32(rows), np.int32(cols), np.int32(center[0]), np.int32(center[1]))
+
+        # copy the result from the OpenCL buffer to the NumPy array
+        cl.enqueue_copy(queue, mask, mask_buf)
+
+        corrected = img * mask[:,:,np.newaxis]
+        return np.rint(corrected).astype(np.uint8)
+
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -111,12 +148,17 @@ class Stitcher:
             if i == 0:
                 img1 = cv2.imread(images[i])
                 img2 = cv2.imread(images[i + 1])
+                if(removeVignette):
+                    img1 = self.removeVignette(img1)
+                    img2 = self.removeVignette(img2)
                 if(verticalCore):
                     img1 = cv2.rotate(img1, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
             else:
                 img1 = composite
                 img2 = cv2.imread(images[i + 1])
+                if(removeVignette):
+                    img2 = self.removeVignette(img2)
                 if(verticalCore):
                     img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
@@ -134,12 +176,14 @@ class Stitcher:
                         vis[:h1, :w1] = img1
                         vis[:h2, w1:w1+w2] = composite
                         composite = vis
-
+                self.logMessage("Size of Composite: " + str(composite.shape))
                 if(callback):
                     callback(1, round(i / len(images) * 100));
-            except:
+            except Exception as e:
+                print(e)
                 self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
 
+        self.logMessage("Size of Composite: " + str(composite.shape))
         if(composite is not None):
             cv2.imwrite(outputPath, composite)
 
