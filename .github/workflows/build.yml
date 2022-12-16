@@ -55,7 +55,7 @@ jobs:
           - os: macos-latest
             TARGET: macos
             CMD_BUILD: >
-                pyinstaller -w -n LinearStitch LS_GUI.py &&
+                pyinstaller --target-arch universal2 -w -n LinearStitch LS_GUI.py &&
                 cd dist/ &&
                 zip -r9 LinearStitchMac LinearStitch.app/
             OUT_FILE_NAME: LinearStitchMac.zip
