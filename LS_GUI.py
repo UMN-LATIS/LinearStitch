@@ -237,6 +237,7 @@ class LinearStitch(wx.Frame):
 		"""Event handler for the button click."""
 		print("Exiting.")
 		self.Close()
+		quit()
 
 	#opens a new menu and closes when selection(s) is made
 	#adds currently selected directory/directories to listbox
@@ -555,7 +556,7 @@ class LinearStitch(wx.Frame):
 			exit()
 
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
-		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked())
+		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]))
 		
 		shutil.copy(outputFile, self.config.configValues["CoreOutputPath"])
 		if(self.archiveImages.IsChecked()):

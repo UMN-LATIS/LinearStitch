@@ -58,6 +58,7 @@ class LSConfig:
 		self.configValues["ZereneLaunchPath"] = self.Config.get("Zerene", "LaunchPath", fallback='"{{Install}}jre/bin/java.exe" -Xmx8000m -DjavaBits=64bitJava -Dlaunchcmddir="{{License}}" -classpath "{{Install}}ZereneStacker.jar;{{Install}}JREextensions/*" com.zerenesystems.stacker.gui.MainFrame -noSplashScreen -exitOnBatchScriptCompletion -runMinimized  -batchScript "{{script}}"')
 		self.configValues["ZereneTemplateFile"] = self.Config.get("Zerene", "TemplateFile", fallback="zereneTemplate.xml")
 		self.configValues["CoreCount"] = self.Config.get("Processing", "CoreCount", fallback="4")
+		self.configValues["VignetteMagic"] = self.Config.get("Processing", "VignetteMagic", fallback="1.1")
 		self.configValues["FocusThreshold"] = self.Config.get("Processing", "FocusThreshold", fallback="13.0")
 		self.configValues["FocusStackInstall"] = self.Config.get("FocusStack", "Install", fallback=str(homedir.absolute()))
 		self.configValues["FocusStackLaunchPath"] = self.Config.get("FocusStack", "LaunchPath", fallback='"{{Install}}" --consistency=0 --align-keep-size --jpgquality=100 --output="{{outputPath}}" "{{folderPath}}/"*jpg')
@@ -76,6 +77,7 @@ class LSConfig:
 	
 		self.Config.set("Processing", "CoreCount",self.configValues["CoreCount"])
 		self.Config.set("Processing", "FocusThreshold",self.configValues["FocusThreshold"])
+		self.Config.set("Processing", "VignetteMagic",self.configValues["VignetteMagic"])
 		
 		self.Config.set("FocusStack", "Install",self.configValues["FocusStackInstall"])
 		self.Config.set("FocusStack", "LaunchPath",self.configValues["FocusStackLaunchPath"])

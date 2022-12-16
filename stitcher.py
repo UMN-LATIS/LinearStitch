@@ -96,7 +96,7 @@ class Stitcher:
         print(message)
 
 
-    def removeVignette(self, img):
+    def removeVignette(self, img, vignetteMagicNumber):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
         # apply the vignette correction algorithm using OpenCL
@@ -105,18 +105,20 @@ class Stitcher:
         mask = np.zeros(gray.shape, dtype=np.float32)
 
         # define an OpenCL kernel that computes the mask for a given row
-        mask_kernel = '''
+        mask_kernel = f'''
         __kernel void compute_mask(__global float *mask, int rows, int cols, int center_x, int center_y)
-        {
+        \u007b
             int row = get_global_id(1);
             int col = get_global_id(0);
             if (row < rows && col < cols)
-                mask[row * cols + col] = 1 + 1.1*(pow((float)(row - center_y), 2) + pow((float)(col - center_x), 2))/(rows*rows + cols*cols);
-        }
+                mask[row * cols + col] = 1 + {vignetteMagicNumber}*(pow((float)(row - center_y), 2) + pow((float)(col - center_x), 2))/(rows*rows + cols*cols);
+        \u007d
         '''
 
         # create an OpenCL context and queue
-        ctx = cl.create_some_context()
+        platform = cl.get_platforms()
+        my_gpu_devices = platform[0].get_devices(device_type=cl.device_type.GPU)
+        ctx = cl.Context(devices=my_gpu_devices)
         queue = cl.CommandQueue(ctx)
 
         # create an OpenCL buffer for the mask
@@ -132,7 +134,7 @@ class Stitcher:
         corrected = img * mask[:,:,np.newaxis]
         return np.rint(corrected).astype(np.uint8)
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette):
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -149,8 +151,8 @@ class Stitcher:
                 img1 = cv2.imread(images[i])
                 img2 = cv2.imread(images[i + 1])
                 if(removeVignette):
-                    img1 = self.removeVignette(img1)
-                    img2 = self.removeVignette(img2)
+                    img1 = self.removeVignette(img1, vignetteMagicNumber)
+                    img2 = self.removeVignette(img2, vignetteMagicNumber)
                 if(verticalCore):
                     img1 = cv2.rotate(img1, cv2.ROTATE_90_COUNTERCLOCKWISE)
                     img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
@@ -158,7 +160,7 @@ class Stitcher:
                 img1 = composite
                 img2 = cv2.imread(images[i + 1])
                 if(removeVignette):
-                    img2 = self.removeVignette(img2)
+                    img2 = self.removeVignette(img2, vignetteMagicNumber)
                 if(verticalCore):
                     img2 = cv2.rotate(img2, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
