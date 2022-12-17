@@ -61,7 +61,7 @@ class LSConfig:
 		self.configValues["VignetteMagic"] = self.Config.get("Processing", "VignetteMagic", fallback="1.1")
 		self.configValues["FocusThreshold"] = self.Config.get("Processing", "FocusThreshold", fallback="13.0")
 		self.configValues["FocusStackInstall"] = self.Config.get("FocusStack", "Install", fallback=str(homedir.absolute()))
-		self.configValues["FocusStackLaunchPath"] = self.Config.get("FocusStack", "LaunchPath", fallback='"{{Install}}" --consistency=0 --align-keep-size --jpgquality=100 --output="{{outputPath}}" "{{folderPath}}/"*jpg')
+		self.configValues["FocusStackLaunchPath"] = self.Config.get("FocusStack", "LaunchPath", fallback='"{{Install}}" --consistency=0 --align-keep-size --no-whitebalance --no-contrast --jpgquality=100 --output="{{outputPath}}" "{{folderPath}}/"*jpg')
 			
 	def save_config(self):
 
