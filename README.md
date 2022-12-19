@@ -4,30 +4,15 @@ LinearStitch is a very simple image stitcher designed for images show in a singl
 
 LinearStitch uses SIFT to identify matches between the likely-overlap regions of two images.  It then directly concatenates those images together (without blending).  The goal is to ensure that the original images are undistorted, even if that means the stitch seam itself is imperfect.
 
-### Installation
+## Installation
 
-Install the most recent version of python 3, which you can find [here](https://www.python.org/downloads/).
+The latest version of LinearStitch is available on the [Latest Release](https://github.com/UMN-LATIS/LinearStitch/releases/tag/latest) page. 
 
-Install Zerene Stacker, which you can download from [here](https://zerenesystems.com/cms/stacker/softwaredownloads). It is recommended to use the default install folder.
+These releases are automatically generated as the code is updated. MacOS and Windows will not directly allow you to execute LinearStitch because they're not "signed" applications. On the Mac, right click on the application and select "open". It'll display a warning. Click "open anyways". You should only need to do that once.
 
-To install all python dependencies using pip, run
+On Windows, you'll similarly need to double click the icon and then click through to allow LinearStitch to run.
 
-```shell
-pip install -r requirements.txt
-```
+In order to use the built in FocusStack support, you'll need to download [FocusStack](https://github.com/PetteriAimonen/focus-stack) and place it in a folder on your computer. You'll need to follow the same steps above to authorize it.
 
-You may then run the LinearStitch application using
-
-```shell
-python LS_GUI.py
-```
-
-tkinter is also required, but comes with most distributions of python. If it is missing you may install it using pip.
-
-For more information on this software, please visit [labs.latis.umn.edu](http://labs.latis.umn.edu).
-
-### Configuration
-
-A sample config file is included: `config.sample.ini`. To start configuring LinearStitch immediately, you may rename `config.sample.ini` to `config.ini`, and update settings there. Most options are documented inside the config file. One option to consider is the ArchivePath, where zipped copies of image directories will be deposited after they are processed.
-
-Whenever `LS_GUI.py` is run, LinearStitch will check for a `config.ini` file. If there is no config, one will be created by copying `config.sample.ini`. This is simply a convenience for fresh installs. An existing `config.ini` will never be overridden.
+## Configuration
+The "prefs" button allows you to set the input and output paths you'll be using. Be sure to set the path to FocusStack. 
