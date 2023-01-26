@@ -4,6 +4,7 @@ import cv2
 import os
 import platform
 import pyopencl as cl
+import pyvips
 
 CONFIG={}
 CONFIG['overlap'] = 0.35
@@ -134,7 +135,72 @@ class Stitcher:
         corrected = img * mask[:,:,np.newaxis]
         return np.rint(corrected).astype(np.uint8)
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1):
+    def rotateAndCrop(self, image):
+        scale_percent = 5 # percent of original size
+        width = int(image.shape[1] * scale_percent / 100)
+        height = int(image.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        
+        # resize image
+        resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
+
+        # Convert the image to grayscale
+        gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+        (thresh, blackAndWhiteImage) = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+        # Find contours
+        contours, _ = cv2.findContours(blackAndWhiteImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Find largest contour
+        max_area = 0
+        largest_contour = None
+        for contour in contours:
+            area = cv2.contourArea(contour)
+            if area > max_area:
+                max_area = area
+                largest_contour = contour
+
+        if largest_contour is not None:
+            # Get moments of the largest contour
+            M = cv2.moments(largest_contour)
+
+            # Get center of mass of the largest contour
+            cx = int(M["m10"] / M["m00"])
+            cy = int(M["m01"] / M["m00"])
+
+            # Get angle of the largest contour
+            (x, y), (MA, ma), angle = cv2.fitEllipse(largest_contour)
+
+
+        # Calculate the angle of rotation
+        # Get the dimensions of the image
+        h, w = resized.shape[:2]
+
+        # Calculate the center of the image
+        center = (w/2, h/2)
+
+        # Perform the rotation
+        M = cv2.getRotationMatrix2D(center, -1* (90-angle), 1.0)
+
+        rotated = cv2.warpAffine(resized, M, (w, h), flags=cv2.INTER_CUBIC)
+
+
+        x = pyvips.Image.new_from_array(image[...,::-1])
+        x = x.rotate((90-angle), interpolate=pyvips.Interpolate.new("bicubic"))
+
+        mask = (x.median(3) - [0.0, 0.0, 0.0]).abs() > 10
+        columns, rows = mask.project()
+
+        left = columns.profile()[1].min()
+        right = columns.width - columns.flip("horizontal").profile()[1].min()
+        top = rows.profile()[0].min()
+        bottom = rows.height - rows.flip("vertical").profile()[0].min()
+
+        x = x.crop(left, top, right - left, bottom - top)
+        result = x.numpy()
+        return result[...,::-1]
+
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1, rotateImage = False):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -184,6 +250,10 @@ class Stitcher:
             except Exception as e:
                 print(e)
                 self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
+
+        if(rotateImage):
+            self.logMessage("Rotating Image")
+            composite = self.rotateAndCrop(composite)
 
         self.logMessage("Size of Composite: " + str(composite.shape))
         if(composite is not None):

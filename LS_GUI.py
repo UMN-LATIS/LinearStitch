@@ -176,6 +176,7 @@ class LinearStitch(wx.Frame):
 		self.maskBox = wx.CheckBox(panel, label="Mask Images")
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 		self.removeVignette = wx.CheckBox(panel, label="Remove Vignetting")
+		self.rotateImage = wx.CheckBox(panel, label="Align Image")
 
 		stackList = ['Don\'t Stack Images',
                     'Stack Images (Zerene)', 'Stack Images (FocusStack)']
@@ -192,6 +193,7 @@ class LinearStitch(wx.Frame):
 		sizer.Add(self.maskBox, 0, wx.ALL, 10)
 		sizer.Add(self.verticalCore, 0, wx.ALL, 10)
 		sizer.Add(self.removeVignette, 0, wx.ALL, 10)
+		sizer.Add(self.rotateImage, 0, wx.ALL, 10)
 		sizer.Add(self.stackImages, 0, wx.ALL, 10)
 		sizer.Add(self.archiveImages, 0, wx.ALL, 10)
 		sizer.Add(button_horzSizer, 0, wx.ALL, 10)
@@ -556,7 +558,7 @@ class LinearStitch(wx.Frame):
 			exit()
 
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
-		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]))
+		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]), self.rotateImage.IsChecked())
 		
 		shutil.copy(outputFile, self.config.configValues["CoreOutputPath"])
 		if(self.archiveImages.IsChecked()):

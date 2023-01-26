@@ -177,7 +177,6 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
     
 
     def save(self, event=None):
-        print("HEY")
         self.config.configValues['ZereneLicense'] = self.zereneLicense.GetValue()
         self.config.configValues['ZereneLaunchPath'] = self.zereneLaunch.GetValue()
         self.config.configValues['ZereneTemplateFile'] = self.zereneTemplate.GetValue()
