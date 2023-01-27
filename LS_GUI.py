@@ -19,6 +19,11 @@ import sys
 from imutils import paths
 from pathlib import Path
 
+import os
+if os.name == 'nt':
+	vipshome = 'c:\\vips-dev\\bin'
+	os.environ['PATH'] = vipshome + ';' + os.environ['PATH']
+
 # required by pyinstaller
 #import pkg_resources.py2_warn
 
