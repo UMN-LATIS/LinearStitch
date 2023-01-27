@@ -6,7 +6,7 @@ matplotlib==3.3.1
 menpo==0.10.0
 numpy==1.22.3
 opencv-contrib-python==4.6.0.66
-Pillow==8.3.0
+Pillow==9.3.0
 pyparsing==2.4.7
 PyQt5==5.15.7
 PyQt5-sip==12.11.0
