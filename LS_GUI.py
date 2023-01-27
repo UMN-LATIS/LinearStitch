@@ -6,6 +6,8 @@ To run app, navigate to directory using the that contains LS_GUI.py using termin
 	$ pythonw LS_GUI.py
 """
 
+import ctypes
+import ctypes.util
 import os
 import wx
 import wx.lib.agw.multidirdialog as MDD
@@ -176,7 +178,9 @@ class LinearStitch(wx.Frame):
 		self.maskBox = wx.CheckBox(panel, label="Mask Images")
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 		self.removeVignette = wx.CheckBox(panel, label="Remove Vignetting")
-		self.rotateImage = wx.CheckBox(panel, label="Align Image")
+		self.rotateImage = wx.CheckBox(panel, label="Straighten Image")
+		if (ctypes.util.find_library('libvips') is None):
+			self.rotateImage.Hide()
 
 		stackList = ['Don\'t Stack Images',
                     'Stack Images (Zerene)', 'Stack Images (FocusStack)']
@@ -238,8 +242,8 @@ class LinearStitch(wx.Frame):
 	def OnTimeToClose(self, evt):
 		"""Event handler for the button click."""
 		print("Exiting.")
-		self.Close()
-		quit()
+		# self.closewindow(self, evt)
+		sys.exit()
 
 	#opens a new menu and closes when selection(s) is made
 	#adds currently selected directory/directories to listbox

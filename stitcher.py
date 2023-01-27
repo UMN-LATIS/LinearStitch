@@ -4,7 +4,11 @@ import cv2
 import os
 import platform
 import pyopencl as cl
-import pyvips
+import ctypes
+import ctypes.util
+if (ctypes.util.find_library('libvips') is not None):
+    import pyvips
+
 
 CONFIG={}
 CONFIG['overlap'] = 0.35

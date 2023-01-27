@@ -13,7 +13,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['libvips'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -26,7 +26,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='LS_GUI',
+    name='LinearStitch',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -37,6 +37,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
+    icon=['icon.icns'],
 )
 coll = COLLECT(
     exe,
@@ -46,11 +47,11 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='LS_GUI',
+    name='LinearStitch',
 )
 app = BUNDLE(
     coll,
-    name='LS_GUI.app',
-    icon=None,
+    name='LinearStitch.app',
+    icon='icon.icns',
     bundle_identifier=None,
 )
