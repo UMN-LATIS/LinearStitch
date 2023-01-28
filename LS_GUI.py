@@ -77,6 +77,8 @@ class LinearStitch(wx.Frame):
 	StackQueue = Queue()
 	ArchiveQueue = Queue()
 
+	
+
 	def __init__(self, parent, title):
 		
 		self.config = LSConfig()
@@ -184,7 +186,7 @@ class LinearStitch(wx.Frame):
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 		self.removeVignette = wx.CheckBox(panel, label="Remove Vignetting")
 		self.rotateImage = wx.CheckBox(panel, label="Straighten Image")
-		if (ctypes.util.find_library('libvips') is None):
+		if (ctypes.util.find_library('libvips-42') is None):
 			self.rotateImage.Hide()
 
 		stackList = ['Don\'t Stack Images',

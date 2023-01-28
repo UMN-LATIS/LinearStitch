@@ -6,7 +6,7 @@ import platform
 import pyopencl as cl
 import ctypes
 import ctypes.util
-if (ctypes.util.find_library('libvips') is not None):
+if (ctypes.util.find_library('libvips-42') is not None):
     import pyvips
 
 
