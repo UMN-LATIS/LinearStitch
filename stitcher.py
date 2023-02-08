@@ -11,17 +11,19 @@ if (ctypes.util.find_library('libvips-42') is not None):
 
 
 CONFIG={}
-CONFIG['overlap'] = 0.35
 CONFIG['max_features'] = 500
 CONFIG['scale_factor'] = 0.5
 CONFIG['flann_checks'] = 12
 
 class Stitcher:
     maxOffset = 0;
+    overlap = 0.35;
+    def __init__(self, overlapValue):
+        self.overlap = overlapValue
 
     def calculate_offset(self,img1, img2, enableMask):
         # Calculate rough overlap in pixels
-        overlap_px = img2.shape[1] * CONFIG['overlap']
+        overlap_px = img2.shape[1] * self.overlap
 
         # Convert images to grayscale and reduce size to scale_factor
         i1 = cv2.cvtColor(cv2.resize(img1[:, -int(overlap_px):, :], (0, 0), fx=CONFIG['scale_factor'], fy=CONFIG['scale_factor']), cv2.COLOR_BGR2GRAY)
@@ -73,10 +75,10 @@ class Stitcher:
         x_offset, y_offset = self.calculate_offset(img1, img2, enableMask)
 
         # we want to seam the images such that we crop the left and right equally.  So use roughly have the overlap betwen them.
-        x_seam = int(img1.shape[1] - (img2.shape[1] * CONFIG['overlap']*.5) + x_offset)
+        x_seam = int(img1.shape[1] - (img2.shape[1] * self.overlap*.5) + x_offset)
         
         # how much of the new image should we crop out?
-        partialImage = int(img2.shape[1] * CONFIG['overlap']*.5);
+        partialImage = int(img2.shape[1] * self.overlap*.5);
 
         self.maxOffset = max(self.maxOffset, y_offset);
 

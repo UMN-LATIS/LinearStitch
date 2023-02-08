@@ -549,7 +549,7 @@ class LinearStitch(wx.Frame):
 		self.StitchQueue.put(folder)
 
 	def stitchFolder(self, targetFolder):
-		stitcherHandler = Stitcher()
+		stitcherHandler = Stitcher(float(self.config.configValues["Overlap"]))
 		filesToStitch = []
 		onlyFiles = [f for f in os.listdir(targetFolder) if isfile(join(targetFolder, f))]
 		for files in onlyFiles:
