@@ -6,7 +6,7 @@ import platform
 import pyopencl as cl
 import ctypes
 import ctypes.util
-if (ctypes.util.find_library('libvips-42') is not None):
+if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips')):
     import pyvips
 
 
@@ -264,7 +264,7 @@ class Stitcher:
         self.logMessage("Size of Composite: " + str(composite.shape))
         if(composite is not None):
             cv2.imwrite(outputPath, composite)
-
+        self.logMessage("Finished")
         if(callback):
             callback(1, 100);
 
