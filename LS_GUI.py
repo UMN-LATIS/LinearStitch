@@ -18,7 +18,7 @@ import shutil
 import sys
 from imutils import paths
 from pathlib import Path
-
+import threading
 import os
 if os.name == 'nt':
 	vipshome = 'c:\\vips-dev\\bin'
@@ -230,6 +230,26 @@ class LinearStitch(wx.Frame):
 		self.Bind(wx.EVT_CLOSE, self.on_exit_button)
 
 		self.pool=multiprocessing.Pool()
+
+		# Create a thread to run the listener function in the background
+		t = threading.Thread(target=self.listener)
+		t.daemon = True
+		t.start()
+
+	def listener(self):
+		while True:
+			address = ('localhost', 6234)     # family is deduced to be 'AF_INET'
+			listener = multiprocessing.connection.Listener(address, authkey=b'dendroFun')
+			conn = listener.accept()
+			print('connection accepted from', listener.last_accepted)
+			msg = conn.recv()
+			# do something with msg
+			print('recieved message: ' + msg )
+			self.receiveMessage(msg)
+			conn.close()
+			listener.close()
+
+
 
 	def showPrefs(self, event):
 		self.prefs = PreferencesEditor(self.config)
@@ -493,6 +513,14 @@ class LinearStitch(wx.Frame):
 				self.StackQueue.put(folder)
 			else:
 				self.StitchQueue.put(folder)
+
+	def receiveMessage(self, folder):
+		if(self.stackImages.GetSelection() > 0):
+			self.StackQueue.put(folder)
+		else:
+			self.StitchQueue.put(folder)
+
+		
 
 	def stackZerene(self, folder):
 
