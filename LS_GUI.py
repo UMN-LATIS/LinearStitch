@@ -581,7 +581,7 @@ class LinearStitch(wx.Frame):
 		filesToStitch = []
 		onlyFiles = [f for f in os.listdir(targetFolder) if isfile(join(targetFolder, f))]
 		for files in onlyFiles:
-			if(files.endswith(".jpg")):
+			if(files.lower().endswith(".jpg")):
 				filesToStitch.append(targetFolder + "/" + files)
 
 		if(len(filesToStitch) < 2):
