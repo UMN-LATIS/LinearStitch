@@ -64,7 +64,7 @@ jobs:
             ARCH: x64
             TARGET: windows
             CMD_BUILD: > 
-              pyinstaller -i icon.icns --exclude-module libvips --add-data 'zereneTemplate.xml:.' -w -n LinearStitch LS_GUI.py &&
+              pyinstaller -i icon.icns --exclude-module libvips --add-data './zereneTemplate.xml:.' -w -n LinearStitch LS_GUI.py &&
               cd dist/ &&
               7z a LinearStitchWindows.zip -r *
             OUT_FILE_NAME: LinearStitchWindows.zip
