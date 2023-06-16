@@ -16,7 +16,7 @@ In order to use the built in FocusStack support, you'll need to download [FocusS
 
 ## Rotation
 
-In order for rotation (straightening the image) to be available, you'll need to install [Libvips](https://www.libvips.org). For Mac, this can be installed via Brew. For Windows users, you should install the prebuilt version of the libvips website. 
+In order for rotation (straightening the image) to be available, you'll need to install [Libvips](https://www.libvips.org). For Mac, this can be installed via Brew. For Windows users, you should install the prebuilt version of the libvips website and save it in c:\vips-dev. If you understand dylibs on Windows and can explain a better way to do that, I'm all ears. 
 
 ## Configuration
 The "prefs" button allows you to set the input and output paths you'll be using. Be sure to set the path to FocusStack. 
