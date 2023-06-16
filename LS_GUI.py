@@ -193,7 +193,7 @@ class LinearStitch(wx.Frame):
                     'Stack Images (Zerene)', 'Stack Images (FocusStack)']
 		self.stackImages = wx.RadioBox(panel, label='Focus Stacking', pos=(80, 10), choices=stackList,
                                  majorDimension=1, style=wx.RA_SPECIFY_COLS)
-		self.stackImages.SetSelection(1)
+		self.stackImages.SetSelection(2)
 
 
 		self.archiveImages = wx.CheckBox(panel, label="Archive Images")
@@ -532,7 +532,7 @@ class LinearStitch(wx.Frame):
 
 		substitutionDict = {'batchLength': len(
 			onlyFolders), 'sourceFiles': sourceString, 'outputPath': folder + "/"}
-		template = open( self.config.configValues["ZereneTemplate"] )
+		template = open( self.config.configValues["ZereneTemplateFile"] )
 		src = Template( template.read() )
 		populatedTemplate = src.substitute(substitutionDict)
 
