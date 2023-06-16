@@ -8,7 +8,7 @@ a = Analysis(
     ['LS_GUI.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[('zereneTemplate.xml', '.')],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
