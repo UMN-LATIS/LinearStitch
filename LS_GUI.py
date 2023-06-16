@@ -551,7 +551,7 @@ class LinearStitch(wx.Frame):
 		if not ZereneLicense.endswith('/'):
 			ZereneLicense += '/'
 
-		commandLine = self.config.configValues["LaunchPath"] \
+		commandLine = self.config.configValues["ZereneLaunchPath"] \
 			.replace('{{Install}}', ZereneInstall) \
 			.replace('{{License}}', ZereneLicense) \
 			.replace('{{script}}', xmlFile);
