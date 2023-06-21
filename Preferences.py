@@ -84,8 +84,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 
 		self.zereneLaunch = wx.TextCtrl( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		fgSizer1.Add( self.zereneLaunch, 0, wx.ALL|wx.EXPAND, 5 )
-
-
+		
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 		self.m_staticText9 = wx.StaticText( panel, wx.ID_ANY, u"Zerene Template", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -179,7 +178,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.m_button1.Bind( wx.EVT_BUTTON, lambda event: self.browseForDirectories(event, 'BrowsePath') )
 		self.m_button2.Bind( wx.EVT_BUTTON, lambda event: self.browseForDirectories(event, 'ArchivePath') )
 		self.m_button3.Bind( wx.EVT_BUTTON, lambda event: self.browseForDirectories(event, 'CoreOutputPath') )
-		self.m_button4.Bind( wx.EVT_BUTTON, lambda event: self.browseForFiles(event, 'ZereneLaunchPath') )
+		self.m_button4.Bind( wx.EVT_BUTTON, lambda event: self.browseForDirectories(event, 'ZereneInstall') )
 		self.m_button6.Bind( wx.EVT_BUTTON, lambda event: self.browseForFiles(event, 'FocusStackInstall') )
 		self.m_button7.Bind( wx.EVT_BUTTON,  self.save )
 		self.reload()
