@@ -138,7 +138,7 @@ class Stitcher:
         # copy the result from the OpenCL buffer to the NumPy array
         cl.enqueue_copy(queue, mask, mask_buf)
 
-        corrected = img * mask[:,:,np.newaxis]
+        corrected = np.clip(img * mask[:,:,np.newaxis], 0, 255)
         return np.rint(corrected).astype(np.uint8)
 
     def rotateAndCrop(self, image):
