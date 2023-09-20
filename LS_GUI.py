@@ -507,6 +507,7 @@ class LinearStitch(wx.Frame):
 		self.myPanel.Layout();
 		for folder in self.cont.GetStrings():
 			onlyFiles = [f for f in os.listdir(folder) if isfile(join(folder, f))]
+			
 			print(onlyFiles)
 			print(folder)
 			if(self.stackImages.GetSelection() > 0):
@@ -590,6 +591,9 @@ class LinearStitch(wx.Frame):
 		outputFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + ".tiff")
 		logFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + "_log.txt")
 		filesToStitch.sort()
+		if(self.config.configValues['RightToLeft'] == True):
+			filesToStitch.reverse()
+			
 		print(filesToStitch)
 		print(outputFile);
 		print("Logging to: " + logFile);

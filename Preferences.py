@@ -18,7 +18,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		# THe main container window
 		panel = wx.Panel(parent)
 
-		panel.SetMinSize((600, 430))
+		panel.SetMinSize((600, 470))
 		fgSizer1 = wx.FlexGridSizer( 0, 3, 0, 0 )
 		fgSizer1.AddGrowableCol( 1 )
 		fgSizer1.SetFlexibleDirection( wx.BOTH )
@@ -134,6 +134,11 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.m_staticText121 = wx.StaticText( panel, wx.ID_ANY, u"Overlap", wx.DefaultPosition, wx.DefaultSize, 0 )
 		self.m_staticText121.Wrap( -1 )
 
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+		self.rightToLeft = wx.CheckBox( panel, wx.ID_ANY, u"Right to Left Core", wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer1.Add( self.rightToLeft, 0, wx.ALL, 5 )
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
 		fgSizer1.Add( self.m_staticText121, 0, wx.ALL, 5 )
 
 		self.overlap = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 1, 0.35, 0.05 )
@@ -163,6 +168,9 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		fgSizer1.Add( self.focusLaunch, 0, wx.ALL|wx.EXPAND, 5)
 		
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+
+
 		self.m_button7 = wx.Button( panel, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
 		fgSizer1.Add( self.m_button7, 0, wx.ALL, 5 )
 
@@ -195,6 +203,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.config.configValues['Overlap'] = str(self.overlap.GetValue())
 		self.config.configValues['FocusThreshold'] = str(self.focusThreshold.GetValue())
 		self.config.configValues['FocusStackLaunchPath'] = self.focusLaunch.GetValue()
+		self.config.configValues['RightToLeft'] = self.rightToLeft.IsChecked()
 		self.config.save_config()
 	
 	def reload(self, event=None):
@@ -212,6 +221,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.focusThreshold.SetValue(self.config.configValues["FocusThreshold"])
 		self.focusStack.SetValue(self.config.configValues["FocusStackInstall"])
 		self.focusLaunch.SetValue(self.config.configValues["FocusStackLaunchPath"])
+		self.rightToLeft.SetValue(self.config.configValues['RightToLeft'])
 
 
 	def browseForFiles( self, event, target):
