@@ -189,13 +189,10 @@ class LinearStitch(wx.Frame):
 		if (ctypes.util.find_library('libvips-42') is None and ctypes.util.find_library('libvips') is None):
 			self.rotateImage.Hide()
 
-		stackList = ['Don\'t Stack Images',
-                    'Stack Images (Zerene)', 'Stack Images (FocusStack)']
-		self.stackImages = wx.RadioBox(panel, label='Focus Stacking', pos=(80, 10), choices=stackList,
-                                 majorDimension=1, style=wx.RA_SPECIFY_COLS)
-		self.stackImages.SetSelection(2)
-
-
+		self.cropImage = wx.CheckBox(panel, label="Crop Image")
+		self.cropImage.SetValue(True)
+		self.stackImages = wx.CheckBox(panel, label="Stack Images")
+		self.stackImages.SetValue(True)
 		self.archiveImages = wx.CheckBox(panel, label="Archive Images")
 		self.archiveImages.SetValue(True)
 
@@ -205,6 +202,7 @@ class LinearStitch(wx.Frame):
 		sizer.Add(self.verticalCore, 0, wx.ALL, 10)
 		sizer.Add(self.removeVignette, 0, wx.ALL, 10)
 		sizer.Add(self.rotateImage, 0, wx.ALL, 10)
+		sizer.Add(self.cropImage, 0, wx.ALL, 10)
 		sizer.Add(self.stackImages, 0, wx.ALL, 10)
 		sizer.Add(self.archiveImages, 0, wx.ALL, 10)
 		sizer.Add(button_horzSizer, 0, wx.ALL, 10)
@@ -456,10 +454,11 @@ class LinearStitch(wx.Frame):
 		while True:
 			if not self.StackQueue.empty():
 				folder = self.StackQueue.get()
-				if(self.stackImages.GetSelection() == 1):
-					self.stackZerene(folder)
-				elif(self.stackImages.GetSelection() == 2):
-					self.stackFocusStack(folder)
+				if(self.stackImages.IsChecked):
+					if(self.config.configValues["StackerSelection"] == "Zerene"):
+						self.stackZerene(folder)
+					elif(self.config.configValues["StackerSelection"] == "FocusStack"):
+						self.stackFocusStack(folder)
 				self.StackQueue.task_done()
 			time.sleep(1)
 
@@ -510,13 +509,13 @@ class LinearStitch(wx.Frame):
 			
 			print(onlyFiles)
 			print(folder)
-			if(self.stackImages.GetSelection() > 0):
+			if(self.stackImages.IsChecked()):
 				self.StackQueue.put(folder)
 			else:
 				self.StitchQueue.put(folder)
 
 	def receiveMessage(self, folder):
-		if(self.stackImages.GetSelection() > 0):
+		if(self.stackImages.IsChecked()):
 			self.StackQueue.put(folder)
 		else:
 			self.StitchQueue.put(folder)
@@ -601,7 +600,7 @@ class LinearStitch(wx.Frame):
 			exit()
 
 		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
-		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]), self.rotateImage.IsChecked())
+		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]), self.rotateImage.IsChecked(), self.cropImage.IsChecked())
 		
 		shutil.copy(outputFile, self.config.configValues["CoreOutputPath"])
 		if(self.archiveImages.IsChecked()):

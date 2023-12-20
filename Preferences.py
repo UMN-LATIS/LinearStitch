@@ -84,7 +84,8 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 
 		self.zereneLaunch = wx.TextCtrl( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
 		fgSizer1.Add( self.zereneLaunch, 0, wx.ALL|wx.EXPAND, 5 )
-		
+
+
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 		self.m_staticText9 = wx.StaticText( panel, wx.ID_ANY, u"Zerene Template", wx.DefaultPosition, wx.DefaultSize, 0 )
@@ -103,47 +104,8 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 
 		fgSizer1.Add( self.m_staticText10, 0, wx.ALL, 5 )
 
-		self.coreCount = wx.SpinCtrl( panel, wx.ID_ANY, u"4", wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 2, 32, 0 )
+		self.coreCount = wx.SpinCtrl( panel, wx.ID_ANY, u"4", wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 2, 32, 4 )
 		fgSizer1.Add( self.coreCount, 0, wx.ALL, 5 )
-
-
-		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-
-		self.m_staticText11 = wx.StaticText( panel, wx.ID_ANY, u"Focus Threshold", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText11.Wrap( -1 )
-
-		fgSizer1.Add( self.m_staticText11, 0, wx.ALL, 5 )
-
-		self.focusThreshold = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 20, 0, 1 )
-		self.focusThreshold.SetDigits( 1 )
-		fgSizer1.Add( self.focusThreshold, 0, wx.ALL, 5 )
-
-		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-
-		self.m_staticText11 = wx.StaticText( panel, wx.ID_ANY, u"Vignette Magic Number", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText11.Wrap( -1 )
-		fgSizer1.Add( self.m_staticText11, 0, wx.ALL, 5 )
- 
-		self.vignetteMagic = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 20, 0, 0.1 )
-		self.vignetteMagic.SetDigits( 1 )
-		fgSizer1.Add( self.vignetteMagic, 0, wx.ALL, 5 )
-
-		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-
-
-		self.m_staticText121 = wx.StaticText( panel, wx.ID_ANY, u"Overlap", wx.DefaultPosition, wx.DefaultSize, 0 )
-		self.m_staticText121.Wrap( -1 )
-
-		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-		self.rightToLeft = wx.CheckBox( panel, wx.ID_ANY, u"Right to Left Core", wx.DefaultPosition, wx.DefaultSize, 0 )
-		fgSizer1.Add( self.rightToLeft, 0, wx.ALL, 5 )
-		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
-
-		fgSizer1.Add( self.m_staticText121, 0, wx.ALL, 5 )
-
-		self.overlap = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 1, 0.35, 0.05 )
-		self.overlap.SetDigits( 2 )
-		fgSizer1.Add( self.overlap, 0, wx.ALL, 5 )
 
 
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
@@ -165,14 +127,72 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		fgSizer1.Add( self.focuslabel, 0, wx.ALL, 5 )
 
 		self.focusLaunch = wx.TextCtrl( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		fgSizer1.Add( self.focusLaunch, 0, wx.ALL|wx.EXPAND, 5)
-		
+		fgSizer1.Add( self.focusLaunch, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.m_staticText11 = wx.StaticText( panel, wx.ID_ANY, u"Focus Threshold", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText11.Wrap( -1 )
+
+		fgSizer1.Add( self.m_staticText11, 0, wx.ALL, 5 )
+
+		self.focusThreshold = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 20, 0, 1 )
+		self.focusThreshold.SetDigits( 1 )
+		fgSizer1.Add( self.focusThreshold, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.m_staticText121 = wx.StaticText( panel, wx.ID_ANY, u"Overlap", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText121.Wrap( -1 )
+
+		fgSizer1.Add( self.m_staticText121, 0, wx.ALL, 5 )
+
+		self.overlap = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 1, 0.35, 0.05 )
+		self.overlap.SetDigits( 2 )
+		fgSizer1.Add( self.overlap, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.m_staticText14 = wx.StaticText( panel, wx.ID_ANY, u"Vignette Magic", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText14.Wrap( -1 )
+
+		fgSizer1.Add( self.m_staticText14, 0, wx.ALL, 5 )
+
+		self.vignetteMagic = wx.SpinCtrlDouble( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, wx.SP_ARROW_KEYS, 0, 20, 0, 0.1 )
+		self.vignetteMagic.SetDigits( 1 )
+		fgSizer1.Add( self.vignetteMagic, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.m_staticText13 = wx.StaticText( panel, wx.ID_ANY, u"Stacker", wx.DefaultPosition, wx.DefaultSize, 0 )
+		self.m_staticText13.Wrap( -1 )
+
+		fgSizer1.Add( self.m_staticText13, 0, wx.ALL, 5 )
+
+		m_stackerSelectionChoices = [ u"Zerene", u"FocusStack" ]
+		self.m_stackerSelection = wx.Choice( panel, wx.ID_ANY, wx.DefaultPosition, wx.DefaultSize, m_stackerSelectionChoices, 0 )
+		self.m_stackerSelection.SetSelection( 1 )
+		fgSizer1.Add( self.m_stackerSelection, 0, wx.ALL, 5 )
+
+
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.rightToLeft = wx.CheckBox( panel, wx.ID_ANY, u"Right to Left Core", wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer1.Add( self.rightToLeft, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 		self.m_button7 = wx.Button( panel, wx.ID_ANY, u"Save", wx.DefaultPosition, wx.DefaultSize, 0 )
 		fgSizer1.Add( self.m_button7, 0, wx.ALL, 5 )
+
 
 		panel.SetSizer( fgSizer1 )
 		panel.Layout()
@@ -204,6 +224,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.config.configValues['FocusThreshold'] = str(self.focusThreshold.GetValue())
 		self.config.configValues['FocusStackLaunchPath'] = self.focusLaunch.GetValue()
 		self.config.configValues['RightToLeft'] = self.rightToLeft.IsChecked()
+		self.config.configValues['StackerSelection'] = self.m_stackerSelection.GetString(self.m_stackerSelection.GetSelection())
 		self.config.save_config()
 	
 	def reload(self, event=None):
@@ -222,6 +243,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.focusStack.SetValue(self.config.configValues["FocusStackInstall"])
 		self.focusLaunch.SetValue(self.config.configValues["FocusStackLaunchPath"])
 		self.rightToLeft.SetValue(self.config.configValues['RightToLeft'])
+		self.m_stackerSelection.SetSelection(self.m_stackerSelection.FindString(self.config.configValues['StackerSelection']))
 
 
 	def browseForFiles( self, event, target):

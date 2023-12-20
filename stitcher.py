@@ -6,6 +6,7 @@ import platform
 import pyopencl as cl
 import ctypes
 import ctypes.util
+from rembg import remove
 if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips')):
     import pyvips
 
@@ -18,6 +19,8 @@ CONFIG['flann_checks'] = 12
 class Stitcher:
     maxOffset = 0;
     overlap = 0.35;
+
+
     def __init__(self, overlapValue):
         self.overlap = overlapValue
 
@@ -64,6 +67,8 @@ class Stitcher:
         # We're not doing any robust analyses of outliers, so let's just take the median and see how it works
         x_offset = int(np.median([elem[0][0] for elem in np.subtract(src_pts, dst_pts)]))
         y_offset = int(np.median([elem[0][1] for elem in np.subtract(src_pts, dst_pts)]))
+
+
         # Rescale offset for original size and return
         self.logMessage('\t- X Offset found: {} px'.format(x_offset * (1/CONFIG['scale_factor'])))
         self.logMessage('\t- Y Offset found: {} px'.format(y_offset * (1/CONFIG['scale_factor'])))
@@ -206,7 +211,7 @@ class Stitcher:
         result = x.numpy()
         return result[...,::-1]
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1, rotateImage = False):
+    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1, rotateImage = False, cropImage = False):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -257,9 +262,48 @@ class Stitcher:
                 print(e)
                 self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
 
+
+        if(cropImage):
+            self.logMessage("Cropping Image")
+            composite = composite[int(self.maxOffset):(composite.shape[0]-int(self.maxOffset)), 0:composite.shape[1]]
+
         if(rotateImage):
             self.logMessage("Rotating Image")
             composite = self.rotateAndCrop(composite)
+
+        
+        # crop image based on max offset
+        
+
+        # scale_percent = 5 # percent of original size
+        # width = int(composite.shape[1] * scale_percent / 100)
+        # height = int(composite.shape[0] * scale_percent / 100)
+        # dim = (width, height)
+        
+        # # resize image
+        # resized = cv2.resize(composite, dim, interpolation = cv2.INTER_AREA)
+
+        # # Convert the image to grayscale
+        # gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
+        # (thresh, blackAndWhiteImage) = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
+
+        # # Find contours
+        # contours, _ = cv2.findContours(blackAndWhiteImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # # Find largest contour
+        # max_area = 0
+        # largest_contour = None
+        # for contour in contours:
+        #     area = cv2.contourArea(contour)
+        #     if area > max_area:
+        #         max_area = area
+        #         largest_contour = contour
+
+        # #draw the largest contour to screen
+        # cv2.drawContours(resized, [largest_contour], 0, (0, 255, 0), 3)
+        # # display on screen
+        # cv2.imshow('Largest Contour', resized)
+        
 
         self.logMessage("Size of Composite: " + str(composite.shape))
         if(composite is not None):
