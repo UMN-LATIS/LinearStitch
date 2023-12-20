@@ -6,7 +6,6 @@ import platform
 import pyopencl as cl
 import ctypes
 import ctypes.util
-from rembg import remove
 if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips')):
     import pyvips
 
