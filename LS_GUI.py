@@ -566,10 +566,28 @@ class LinearStitch(wx.Frame):
 		for stackFolder in onlyFolders:
 
 			focusStackInstall = self.config.configValues["FocusStackInstall"]
-			
+			inputPath = ""
+			if(self.config.configValues["PruneBeforeStacking"]):
+				files = [f for f in os.listdir(folder + "/" + stackFolder) if isfile(join(folder + "/" + stackFolder, f))]
+				files.sort()
+				onlyJpegs = [jpg for jpg in files if jpg.lower().endswith(".jpg")]
+				if(len(onlyJpegs) < 1):
+					continue
+				# sort the files by filesize and remove the smallest 50% of them files
+				fileSizes = []
+				for file in onlyJpegs:
+					fileSizes.append(os.path.getsize(folder + "/" + stackFolder + "/" + file))
+				median = statistics.median(fileSizes)
+				for file in onlyJpegs:
+					if(os.path.getsize(folder + "/" + stackFolder + "/" + file) >= median):
+						inputPath = inputPath + ' "' + folder + "/" + stackFolder + "/" + file + '"'
+			else:
+				inputPath = '"' + folder + "/" + stackFolder + "/*jpg" + '"'
+
+
 			commandLine = self.config.configValues["FocusStackLaunchPath"] \
                             .replace('{{Install}}', focusStackInstall) \
-                            .replace('{{folderPath}}', folder + "/" + stackFolder) \
+                            .replace('{{folderPath}}', inputPath) \
                             .replace('{{outputPath}}', folder + "/" + stackFolder + ".jpg")
 			print(commandLine);
 			subprocess.call(commandLine, stdout=DEVNULL,

@@ -12,7 +12,7 @@ if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips'
 
 CONFIG={}
 CONFIG['max_features'] = 500
-CONFIG['scale_factor'] = 0.5
+CONFIG['scale_factor'] = 0.25
 CONFIG['flann_checks'] = 12
 
 class Stitcher:
@@ -146,7 +146,7 @@ class Stitcher:
         return np.rint(corrected).astype(np.uint8)
 
     def rotateAndCrop(self, image):
-        scale_percent = 5 # percent of original size
+        scale_percent = 2.5 # percent of original size
         width = int(image.shape[1] * scale_percent / 100)
         height = int(image.shape[0] * scale_percent / 100)
         dim = (width, height)

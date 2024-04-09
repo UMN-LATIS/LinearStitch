@@ -127,7 +127,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		fgSizer1.Add( self.focuslabel, 0, wx.ALL, 5 )
 
 		self.focusLaunch = wx.TextCtrl( panel, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
-		fgSizer1.Add( self.focusLaunch, 0, wx.ALL, 5 )
+		fgSizer1.Add( self.focusLaunch, 0, wx.ALL|wx.EXPAND, 5 )
 
 
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
@@ -181,6 +181,13 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
+
+		self.m_pruneBefore = wx.CheckBox( panel, wx.ID_ANY, u"Prune Before Stacking", wx.DefaultPosition, wx.DefaultSize, 0 )
+		fgSizer1.Add( self.m_pruneBefore, 0, wx.ALL, 5 )
+
+
+		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
 		fgSizer1.Add( ( 0, 0), 1, wx.EXPAND, 5 )
 
@@ -225,6 +232,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.config.configValues['FocusStackLaunchPath'] = self.focusLaunch.GetValue()
 		self.config.configValues['RightToLeft'] = self.rightToLeft.IsChecked()
 		self.config.configValues['StackerSelection'] = self.m_stackerSelection.GetString(self.m_stackerSelection.GetSelection())
+		self.config.configValues['PruneBeforeStacking'] = self.m_pruneBefore.IsChecked()
 		self.config.save_config()
 	
 	def reload(self, event=None):
@@ -243,6 +251,7 @@ class GeneralPreferencesPage(wx.StockPreferencesPage):
 		self.focusStack.SetValue(self.config.configValues["FocusStackInstall"])
 		self.focusLaunch.SetValue(self.config.configValues["FocusStackLaunchPath"])
 		self.rightToLeft.SetValue(self.config.configValues['RightToLeft'])
+		self.m_pruneBefore.SetValue(self.config.configValues['PruneBeforeStacking'])
 		self.m_stackerSelection.SetSelection(self.m_stackerSelection.FindString(self.config.configValues['StackerSelection']))
 
 

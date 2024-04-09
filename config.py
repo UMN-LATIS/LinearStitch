@@ -62,9 +62,10 @@ class LSConfig:
 		self.configValues["Overlap"] = self.Config.get("Processing", "Overlap", fallback="0.35")
 		self.configValues["FocusThreshold"] = self.Config.get("Processing", "FocusThreshold", fallback="13.0")
 		self.configValues["RightToLeft"] = True if self.Config.get("Processing", "RightToLeft", fallback="0") == "1" else False
+		self.configValues["PruneBeforeStacking"] = True if self.Config.get("Processing", "PruneBeforeStacking", fallback="0") == "1" else False
 		self.configValues["StackerSelection"] = self.Config.get("Processing", "StackerSelection", fallback="FocusStack")
 		self.configValues["FocusStackInstall"] = self.Config.get("FocusStack", "Install", fallback=str(homedir.absolute()))
-		self.configValues["FocusStackLaunchPath"] = self.Config.get("FocusStack", "LaunchPath", fallback='"{{Install}}" --consistency=0 --align-keep-size --no-whitebalance --no-contrast --jpgquality=100 --output="{{outputPath}}" "{{folderPath}}/"*jpg')
+		self.configValues["FocusStackLaunchPath"] = self.Config.get("FocusStack", "LaunchPath", fallback='"{{Install}}" --consistency=0 --align-keep-size --no-whitebalance --no-contrast --jpgquality=100 --output="{{outputPath}}" {{folderPath}}')
 			
 	def save_config(self):
 
@@ -84,6 +85,7 @@ class LSConfig:
 		self.Config.set("Processing", "VignetteMagic",self.configValues["VignetteMagic"])
 		self.Config.set("Processing", "Overlap",self.configValues["Overlap"])
 		self.Config.set("Processing", "RightToLeft","1" if self.configValues["RightToLeft"] else "0")
+		self.Config.set("Processing", "PruneBeforeStacking","1" if self.configValues["PruneBeforeStacking"] else "0")
 		self.Config.set("Processing", "StackerSelection",self.configValues["StackerSelection"])
 		self.Config.set("FocusStack", "Install",self.configValues["FocusStackInstall"])
 		self.Config.set("FocusStack", "LaunchPath",self.configValues["FocusStackLaunchPath"])
