@@ -6,8 +6,8 @@ import platform
 import pyopencl as cl
 import ctypes
 import ctypes.util
-if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips')):
-    import pyvips
+# if (ctypes.util.find_library('libvips-42') or ctypes.util.find_library('libvips')):
+import pyvips
 
 
 CONFIG={}
