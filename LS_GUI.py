@@ -186,8 +186,8 @@ class LinearStitch(wx.Frame):
 		self.verticalCore = wx.CheckBox(panel, label="Vertical Core")
 		self.removeVignette = wx.CheckBox(panel, label="Remove Vignetting")
 		self.rotateImage = wx.CheckBox(panel, label="Straighten Image")
-		# if (ctypes.util.find_library('libvips-42') is None and ctypes.util.find_library('libvips') is None):
-		# self.rotateImage.Hide()
+		if (os.name == 'nt' and ctypes.util.find_library('libvips-42') is None and ctypes.util.find_library('libvips') is None):
+			self.rotateImage.Hide()
 
 		self.cropImage = wx.CheckBox(panel, label="Crop Image")
 		self.cropImage.SetValue(True)
