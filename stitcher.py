@@ -154,12 +154,18 @@ class Stitcher:
         # resize image
         resized = cv2.resize(image, dim, interpolation = cv2.INTER_AREA)
 
+        # write the scaled image to disk
+        cv2.imwrite('scaled_image.jpg', resized)
+
         # Convert the image to grayscale
         gray = cv2.cvtColor(resized, cv2.COLOR_BGR2GRAY)
         (thresh, blackAndWhiteImage) = cv2.threshold(gray, 127, 255, cv2.THRESH_BINARY)
 
+        # blur the image with a guassian blur
+        blurred = cv2.GaussianBlur(blackAndWhiteImage, (5, 5), 0)
+
         # Find contours
-        contours, _ = cv2.findContours(blackAndWhiteImage, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+        contours, _ = cv2.findContours(blurred, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
         # Find largest contour
         max_area = 0
@@ -181,32 +187,30 @@ class Stitcher:
             # Get angle of the largest contour
             (x, y), (MA, ma), angle = cv2.fitEllipse(largest_contour)
 
-
-        # Calculate the angle of rotation
-        # Get the dimensions of the image
-        h, w = resized.shape[:2]
-
-        # Calculate the center of the image
-        center = (w/2, h/2)
-
-        # Perform the rotation
-        M = cv2.getRotationMatrix2D(center, -1* (90-angle), 1.0)
-
-        rotated = cv2.warpAffine(resized, M, (w, h), flags=cv2.INTER_CUBIC)
-
-
         x = pyvips.Image.new_from_array(image[...,::-1])
         x = x.rotate((90-angle), interpolate=pyvips.Interpolate.new("bicubic"))
+        
+        print(angle)
+        # get the height of the area that we want to crop by using the inverse sign of the rotation angle and the width of the image
+        height = int(image.shape[1] * np.abs(np.sin(np.radians(90-angle))))
 
-        mask = (x.median(3) - [0.0, 0.0, 0.0]).abs() > 10
-        columns, rows = mask.project()
+        # crop the height of the image to 2x height center crop
+        x = x.crop(0, height, x.width, x.height - (height * 2))
 
-        left = columns.profile()[1].min()
-        right = columns.width - columns.flip("horizontal").profile()[1].min()
-        top = rows.profile()[0].min()
-        bottom = rows.height - rows.flip("vertical").profile()[0].min()
+        # mask = (x.median(3) - [0.0, 0.0, 0.0]).abs() > 10
+        # columns, rows = mask.project()
 
-        x = x.crop(left, top, right - left, bottom - top)
+        # left = columns.profile()[1].min()
+        # right = columns.width - columns.flip("horizontal").profile()[1].min()
+        # top = rows.profile()[0].min()
+        # bottom = rows.height - rows.flip("vertical").profile()[0].min()
+
+        # x = x.crop(left, top, right - left, bottom - top)
+
+        # find the rectangle which crops all of the black area from the image
+
+
+
         result = x.numpy()
         return result[...,::-1]
 
@@ -262,7 +266,7 @@ class Stitcher:
                 self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
 
 
-        if(cropImage):
+        if(cropImage and not rotateImage):
             self.logMessage("Cropping Image")
             composite = composite[int(self.maxOffset):(composite.shape[0]-int(self.maxOffset)), 0:composite.shape[1]]
 
