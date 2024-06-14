@@ -52,11 +52,11 @@ class Stitcher:
 
         # As of 10/11/2016, Flann is broken on binary builds of opencv for windows.  Fall back to BF in those cases.
         # if(platform.system() != 'Windows'):
-            # flann = cv2.FlannBasedMatcher({'algorithm': 0, 'trees': 5}, {'checks': CONFIG['flann_checks']})
-            # matches = flann.knnMatch(des1, des2, k=2)
+        flann = cv2.FlannBasedMatcher({'algorithm': 0, 'trees': 5}, {'checks': CONFIG['flann_checks']})
+        matches = flann.knnMatch(des1, des2, k=2)
         # else:
-        bfMatch = cv2.BFMatcher(cv2.NORM_L2)
-        matches = bfMatch.knnMatch(des1, des2, k=2)
+        # bfMatch = cv2.BFMatcher(cv2.NORM_L2)
+        # matches = bfMatch.knnMatch(des1, des2, k=2)
 
         # Limit to reasonable matches
         good_matches = [m for m, n in matches if m.distance < 0.7 * n.distance]
