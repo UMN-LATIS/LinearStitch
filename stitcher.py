@@ -214,7 +214,7 @@ class Stitcher:
         result = x.numpy()
         return result[...,::-1]
 
-    def stitchFileList(self,images, outputPath, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1, rotateImage = False, cropImage = False):
+    def stitchFileList(self,images, outputPath,scaledPreviewFile, logFile, callback, enableMask, scaleImage, verticalCore, removeVignette, vignetteMagicNumber=1.1, rotateImage = False, cropImage = False):
         composite = None;
         # Starting from the left, stitch the next image in the sequence to the intermediate file.
         
@@ -311,6 +311,21 @@ class Stitcher:
         self.logMessage("Size of Composite: " + str(composite.shape))
         if(composite is not None):
             cv2.imwrite(outputPath, composite)
+
+        # resize the image to a max 1000pixel wide by 1000pixel high
+        if composite.shape[0] > 1000 or composite.shape[1] > 1000:
+            self.logMessage("Writing preview image")
+            if composite.shape[0] > composite.shape[1]:
+                scale_percent = 1000 / composite.shape[0] * 100
+            else:
+                scale_percent = 1000 / composite.shape[1] * 100
+            width = int(composite.shape[1] * scale_percent / 100)
+            height = int(composite.shape[0] * scale_percent / 100)
+            dim = (width, height)
+            # resize image
+            resized = cv2.resize(composite, dim, interpolation = cv2.INTER_AREA)
+            cv2.imwrite(scaledPreviewFile, resized)
+
         self.logMessage("Finished")
         if(callback):
             callback(1, 100);

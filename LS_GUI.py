@@ -606,6 +606,7 @@ class LinearStitch(wx.Frame):
 			return
 		parentName = os.path.split(os.path.dirname(filesToStitch[0]))[1]
 		outputFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + ".tiff")
+		scaledPreviewFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + "_preview.jpg")
 		logFile = os.path.join(os.path.dirname(filesToStitch[0]),parentName + "_log.txt")
 		filesToStitch.sort()
 		if(self.config.configValues['RightToLeft'] == True):
@@ -617,7 +618,7 @@ class LinearStitch(wx.Frame):
 		if(outputFile is None):
 			exit()
 
-		stitcherHandler.stitchFileList(filesToStitch, outputFile, logFile, self.progressCallback,
+		stitcherHandler.stitchFileList(filesToStitch, outputFile, scaledPreviewFile, logFile, self.progressCallback,
 		                               self.maskBox.IsChecked(), self.scalePath, self.verticalCore.IsChecked(), self.removeVignette.IsChecked(), float(self.config.configValues["VignetteMagic"]), self.rotateImage.IsChecked(), self.cropImage.IsChecked())
 		
 		shutil.copy(outputFile, self.config.configValues["CoreOutputPath"])
