@@ -94,7 +94,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         path: dist/${{matrix.OUT_FILE_NAME}}
-        name: LinearStitch ${{ matrix.os }} binary
+        name: LinearStitch ${{ matrix.os }} binary.zip
   release:
     needs: [build]
     runs-on: ubuntu-20.04
@@ -110,5 +110,5 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/LinearStitchWindows.zip"
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-13-xlarge binary/LinearStitchMac.zip"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary.zip"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-13-xlarge binary.zip"
