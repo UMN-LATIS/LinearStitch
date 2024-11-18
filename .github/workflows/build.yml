@@ -91,7 +91,7 @@ jobs:
     - name: Build with pyinstaller for ${{matrix.TARGET}}
       run: ${{matrix.CMD_BUILD}}
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         path: dist/${{matrix.OUT_FILE_NAME}}
         name: LinearStitch ${{ matrix.os }} binary
