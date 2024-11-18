@@ -66,6 +66,7 @@ jobs:
             CMD_BUILD: > 
               pyinstaller -i icon.icns --add-data 'zereneTemplate.xml;.' -w -n LinearStitch LS_GUI.py &&
               cd dist/ &&
+              dir && 
               7z a LinearStitchWindows.zip -r *
             OUT_FILE_NAME: LinearStitchWindows.zip
             ASSET_MIME: application/vnd.microsoft.portable-executable
@@ -100,7 +101,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Download
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v3
       - name: List artifacts
         run: |
           find 
@@ -110,5 +111,5 @@ jobs:
         if: github.ref == 'refs/heads/master'
         run: |
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary"
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-13-xlarge binary"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/LinearStitchWindows.zip"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-13-xlarge binary/LinearStitchMac.zip"
