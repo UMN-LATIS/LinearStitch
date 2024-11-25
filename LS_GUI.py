@@ -1,6 +1,6 @@
-### installation instruction for wxPython-Phoenix  : https://wiki.wxpython.org/How%20to%20install%20wxPython#Installing_wxPython-Phoenix_using_pip
-### modified from : https://stackoverflow.com/questions/28417602/ask-multiple-directories-dialog-in-tkinter
-###					https://wxpython.org/pages/overview/#hello-world
+# © 2024 Regents of the University of Minnesota. All rights reserved.
+# This program is shared under the terms and conditions of the GNU General Public License 3.0, License. Further details about the GNU GPL 3.0 license are available in the license.txt file
+
 """
 To run app, navigate to directory using the that contains LS_GUI.py using terminal. Then type:
 	$ pythonw LS_GUI.py
