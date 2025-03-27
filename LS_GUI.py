@@ -661,10 +661,21 @@ class Processor:
 		avg_color = numpy.average(avg_color_per_row, axis=0)
 		return avg_color
 
-
+class CustomOutputWindow(wx.Frame):
+    def __init__(self):
+        wx.Frame.__init__(self, None, -1, "LinearStitch Output", 
+                          pos=(50, 50), size=(600, 300))
+        self.text = wx.TextCtrl(self, -1, "", style=wx.TE_MULTILINE|wx.TE_READONLY)
+        
+    def write(self, text):
+        self.text.AppendText(text)
 class MyApp(wx.App):
 	def OnInit(self):
-		frame = LinearStitch(None, "Linear Stitch")
+		self.outputWindow = CustomOutputWindow()
+		self.outputWindow.Show()
+		sys.stdout = self.outputWindow
+		sys.stderr = self.outputWindow
+		frame = LinearStitch(None, "LinearStitch")
 		self.SetTopWindow(frame)
 		frame.Show(True)
 		return True
