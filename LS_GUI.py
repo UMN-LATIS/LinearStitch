@@ -582,7 +582,7 @@ class LinearStitch(wx.Frame):
 					if(os.path.getsize(folder + "/" + stackFolder + "/" + file) >= median):
 						inputPath = inputPath + ' "' + folder + "/" + stackFolder + "/" + file + '"'
 			else:
-				inputPath = '"' + folder + "/" + stackFolder + "/" + '"'
+				inputPath = '"' + folder + "/" + stackFolder + "/" + '"' + "*jpg" 
 
 
 			commandLine = self.config.configValues["FocusStackLaunchPath"] \
