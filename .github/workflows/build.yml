@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     tags: ['v*']
   pull_request:
   workflow_dispatch:
@@ -39,18 +39,21 @@ jobs:
         run: python -m pytest tests/ -q
 
   # -----------------------------------------------------------------------
-  # Native app builds — runs after tests pass, on master + tags
+  # Native app builds — runs after tests pass, on main, tags and manual runs
   # -----------------------------------------------------------------------
   build:
     name: Build (${{ matrix.platform }})
     needs: test
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.ref == 'refs/heads/main' ||
+      startsWith(github.ref, 'refs/tags/')
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          - os: macos-14          # Apple Silicon runner
+          - os: macos-15          # Apple Silicon runner
             platform: macOS
             briefcase_platform: macos
             artifact_glob: "dist/*.dmg"
@@ -79,7 +82,12 @@ jobs:
 
       # `briefcase create` downloads Python, creates the app skeleton and
       # installs the app's dependencies into it.
+      # CFLAGS: recent Xcode/clang treat GType function-pointer signature
+      # mismatches between glib and libvips headers as hard errors instead
+      # of warnings, breaking pyvips' cffi build against brew's libvips.
       - name: Create app bundle
+        env:
+          CFLAGS: -Wno-error=incompatible-function-pointer-types
         run: briefcase create ${{ matrix.briefcase_platform }}
 
       # `briefcase build` compiles/links the bundle into a runnable .app
@@ -105,12 +113,15 @@ jobs:
           path: ${{ matrix.artifact_glob }}
 
   # -----------------------------------------------------------------------
-  # Attach the built binaries to the "latest" pre-release on master
+  # Attach the built binaries to the "latest" pre-release.
+  # Skipped for manual runs so ad-hoc builds never overwrite the release.
   # -----------------------------------------------------------------------
   release:
     name: Publish to latest release
     needs: build
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    if: >-
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -128,7 +139,7 @@ jobs:
           gh release view latest --repo "$GH_REPO" 2>/dev/null || \
             gh release create latest --repo "$GH_REPO" \
               --title "Development Build" \
-              --notes "Automated build from the master branch." \
+              --notes "Automated build from the main branch." \
               --prerelease
 
       # Replace old assets and upload the new ones

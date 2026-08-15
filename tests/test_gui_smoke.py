@@ -22,7 +22,7 @@ def settings(tmp_path):
 
 
 @pytest.fixture
-def main_window(qtbot, settings, monkeypatch):
+def main_window(qtbot, settings, monkeypatch, tmp_path):
     # Stub the worker manager and IPC listener to avoid real threads/sockets.
     import linearstitch.gui.main_window as mw
 
@@ -75,6 +75,12 @@ def main_window(qtbot, settings, monkeypatch):
     monkeypatch.setattr(mw, "WorkerManager", FakeManager)
     monkeypatch.setattr(mw, "IPCListener", FakeIPC)
 
+    # Keep persisted window state out of the user's real settings store.
+    from PySide6.QtCore import QSettings
+
+    ini = str(tmp_path / "ui.ini")
+    monkeypatch.setattr(mw, "QSettings", lambda: QSettings(ini, QSettings.IniFormat))
+
     window = mw.MainWindow(settings)
     qtbot.addWidget(window)
     return window
@@ -110,6 +116,21 @@ def test_scan_submits_folders(main_window):
     main_window.folder_list.add_folder("/tmp/core_a")
     main_window._on_scan()
     assert main_window.manager.submitted_scan == ["/tmp/core_a"]
+
+
+def test_window_fits_small_screens(main_window):
+    assert main_window.minimumSizeHint().height() < 600
+
+
+def test_results_pane_collapses_and_restores(main_window):
+    splitter = main_window._splitter
+    splitter.setSizes([400, 200])
+
+    main_window._results_action.setChecked(False)
+    assert splitter.sizes()[1] == 0
+
+    main_window._results_action.setChecked(True)
+    assert splitter.sizes()[1] > 0
 
 
 def test_folder_list_dedup_and_clear(main_window):

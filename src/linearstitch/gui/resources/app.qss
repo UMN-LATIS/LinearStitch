@@ -18,26 +18,15 @@ QLabel#HeaderLabel {
 
 QLabel#SectionLabel {
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
     color: #6b7280;
-    text-transform: uppercase;
+    padding-left: 2px;
 }
 
-QGroupBox {
+QFrame#Card {
     background-color: #ffffff;
     border: 1px solid #e3e6ea;
     border-radius: 10px;
-    margin-top: 14px;
-    padding: 14px 12px 12px 12px;
-    font-weight: 600;
-    color: #374151;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    left: 12px;
-    padding: 0 4px;
 }
 
 QListWidget,
@@ -147,34 +136,68 @@ QMenuBar {
     background-color: #f5f6f8;
 }
 
-/* ---- Dock widgets ---- */
+/* ---- Toolbar, splitter and results tabs ---- */
 
-QDockWidget {
+QToolBar#ActionToolBar {
+    background-color: #fbfbfc;
+    border: none;
+    border-bottom: 1px solid #e3e6ea;
+    spacing: 10px;
+    padding: 10px 14px;
+}
+
+QToolBar#ActionToolBar QPushButton {
+    min-height: 18px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+
+QToolBar#ActionToolBar QPushButton#PrimaryButton {
+    padding: 8px 22px;
+}
+
+QScrollArea#ControlsScrollArea,
+QScrollArea#ControlsScrollArea > QWidget > QWidget {
+    background-color: #f5f6f8;
+}
+
+QSplitter#MainSplitter::handle {
+    background-color: #dfe3e8;
+    height: 6px;
+}
+
+QSplitter#MainSplitter::handle:hover {
+    background-color: #c2c8d0;
+}
+
+QTabWidget#ResultsTabs::pane {
+    border: none;
+    border-top: 1px solid #d7dbe0;
+}
+
+QTabWidget#ResultsTabs::tab-bar {
+    alignment: left;
+    left: 8px;
+}
+
+QTabWidget#ResultsTabs QTabBar::tab {
+    background-color: #eef0f3;
+    color: #4b5563;
+    border: 1px solid #d7dbe0;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    min-width: 72px;
+    padding: 4px 12px;
+    margin-right: 2px;
     font-size: 12px;
     font-weight: 600;
-    color: #374151;
-    titlebar-close-icon: url();
-    titlebar-normal-icon: url();
 }
 
-QDockWidget::title {
-    background-color: #eef0f3;
-    border-bottom: 1px solid #d7dbe0;
-    padding: 5px 10px;
-    text-align: left;
-}
-
-QDockWidget::close-button,
-QDockWidget::float-button {
-    border: none;
-    padding: 2px;
-    background: transparent;
-}
-
-QDockWidget::close-button:hover,
-QDockWidget::float-button:hover {
-    background: #d7dbe0;
-    border-radius: 4px;
+QTabWidget#ResultsTabs QTabBar::tab:selected {
+    background-color: #2f6fed;
+    color: #ffffff;
+    border-color: #2f6fed;
 }
 
 /* ---- Preview panel ---- */
@@ -188,5 +211,4 @@ QLabel#PreviewLabel {
     background-color: #282c34;
     color: #6b7280;
     font-size: 12px;
-    padding: 16px;
 }

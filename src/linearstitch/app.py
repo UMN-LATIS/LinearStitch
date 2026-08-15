@@ -29,6 +29,7 @@ def run() -> int:
     brand = current_brand()
 
     app = QApplication(sys.argv)
+    app.setOrganizationName(brand.name)
     app.setApplicationName(brand.name)
     app.setApplicationDisplayName(brand.window_title)
     app.setStyleSheet(_load_stylesheet())

@@ -5,20 +5,24 @@ from __future__ import annotations
 import ctypes.util
 import os
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction
+from PySide6.QtCore import QSettings, Qt
+from PySide6.QtGui import QAction, QGuiApplication
 from PySide6.QtWidgets import (
     QCheckBox,
-    QDockWidget,
+    QFrame,
     QGridLayout,
-    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QMainWindow,
     QProgressBar,
     QPushButton,
+    QScrollArea,
+    QSizePolicy,
+    QSplitter,
+    QTabWidget,
     QTextEdit,
+    QToolBar,
     QVBoxLayout,
     QWidget,
 )
@@ -31,6 +35,29 @@ from ..workers.manager import WorkerManager
 from .preferences_dialog import PreferencesDialog
 from .widgets.file_list import FolderListWidget, choose_directories
 from .widgets.preview_panel import PreviewPanel
+
+
+def _card(title: str) -> tuple[QWidget, QVBoxLayout]:
+    """A titled panel: a small caption above a rounded content card.
+
+    Returns the wrapper to add to a layout and the card's content layout.
+    """
+    wrapper = QWidget()
+    outer = QVBoxLayout(wrapper)
+    outer.setContentsMargins(0, 0, 0, 0)
+    outer.setSpacing(5)
+
+    caption = QLabel(title.upper())
+    caption.setObjectName("SectionLabel")
+    outer.addWidget(caption)
+
+    card = QFrame()
+    card.setObjectName("Card")
+    content = QVBoxLayout(card)
+    content.setContentsMargins(12, 12, 12, 12)
+    outer.addWidget(card, 1)
+
+    return wrapper, content
 
 
 class MainWindow(QMainWindow):
@@ -55,10 +82,11 @@ class MainWindow(QMainWindow):
 
         self.setWindowTitle(self.brand.window_title)
         self.resize(800, 580)
+        self._qsettings = QSettings()
         self._build_menu()
         self._build_ui()
-        self._build_docks()
         self.statusBar().showMessage("Ready")
+        self._restore_state()
 
     # -- ui ---------------------------------------------------------------
 
@@ -78,20 +106,18 @@ class MainWindow(QMainWindow):
         self._view_menu = self.menuBar().addMenu("&View")
 
     def _build_ui(self) -> None:
-        central = QWidget()
-        root = QVBoxLayout(central)
-        root.setContentsMargins(16, 16, 16, 16)
-        root.setSpacing(12)
+        controls = QWidget()
+        root = QVBoxLayout(controls)
+        root.setContentsMargins(10, 10, 10, 10)
+        root.setSpacing(8)
 
-        header = QLabel(self.brand.window_title)
-        header.setObjectName("HeaderLabel")
-        root.addWidget(header)
+        # --- Folder queue (with the scale reference folded in) ---
+        folders_card, folders_group_layout = _card("Capture Folders")
+        folders_group_layout.setSpacing(6)
 
-        # --- Folder queue ---
-        folders_group = QGroupBox("Capture Folders")
-        folders_layout = QHBoxLayout(folders_group)
-
+        folders_layout = QHBoxLayout()
         self.folder_list = FolderListWidget()
+        self.folder_list.setMinimumHeight(70)
         folders_layout.addWidget(self.folder_list, 1)
 
         folder_buttons = QVBoxLayout()
@@ -106,12 +132,9 @@ class MainWindow(QMainWindow):
         folder_buttons.addWidget(clear_btn)
         folder_buttons.addStretch(1)
         folders_layout.addLayout(folder_buttons)
+        folders_group_layout.addLayout(folders_layout, 1)
 
-        root.addWidget(folders_group)
-
-        # --- Scale image ---
-        scale_group = QGroupBox("Scale Reference")
-        scale_layout = QHBoxLayout(scale_group)
+        scale_layout = QHBoxLayout()
         select_scale = QPushButton("Select Scale…")
         select_scale.clicked.connect(self._on_select_scale)
         self.scale_field = QLineEdit()
@@ -119,13 +142,16 @@ class MainWindow(QMainWindow):
         self.scale_field.setPlaceholderText("Optional scale image prepended to the panorama")
         scale_layout.addWidget(select_scale)
         scale_layout.addWidget(self.scale_field, 1)
-        root.addWidget(scale_group)
+        folders_group_layout.addLayout(scale_layout)
 
-        # --- Options (2-column grid saves vertical space) ---
-        options_group = QGroupBox("Processing Options")
-        options_layout = QGridLayout(options_group)
+        root.addWidget(folders_card, 1)
+
+        # --- Options (4-column grid saves vertical space) ---
+        options_card, options_box = _card("Processing Options")
+        options_layout = QGridLayout()
         options_layout.setHorizontalSpacing(24)
         options_layout.setVerticalSpacing(2)
+        options_box.addLayout(options_layout)
 
         self.mask_box = QCheckBox("Mask Images")
         self.vertical_core = QCheckBox("Vertical Core")
@@ -138,41 +164,38 @@ class MainWindow(QMainWindow):
         self.archive_images = QCheckBox("Archive Images")
         self.archive_images.setChecked(True)
 
-        if (
+        vips_missing = (
             os.name == "nt"
             and ctypes.util.find_library("libvips-42") is None
             and ctypes.util.find_library("libvips") is None
-        ):
-            self.rotate_image.hide()
+        )
 
         checkboxes = [
-            self.mask_box,       self.vertical_core,
-            self.remove_vignette, self.rotate_image,
-            self.crop_image,     self.stack_images,
+            self.mask_box,
+            self.vertical_core,
+            self.remove_vignette,
+            self.rotate_image,
+            self.crop_image,
+            self.stack_images,
             self.archive_images,
         ]
+        if vips_missing:
+            self.rotate_image.hide()
+            checkboxes.remove(self.rotate_image)
+        self._option_boxes = {
+            "mask": self.mask_box,
+            "verticalCore": self.vertical_core,
+            "removeVignette": self.remove_vignette,
+            "rotate": self.rotate_image,
+            "crop": self.crop_image,
+            "stack": self.stack_images,
+            "archive": self.archive_images,
+        }
+        columns = 4
         for i, box in enumerate(checkboxes):
-            options_layout.addWidget(box, i // 2, i % 2)
+            options_layout.addWidget(box, i // columns, i % columns)
 
-        root.addWidget(options_group)
-
-        # --- Actions ---
-        actions = QHBoxLayout()
-        prefs_btn = QPushButton("Preferences")
-        prefs_btn.clicked.connect(self._on_prefs)
-        scan_btn = QPushButton("Scan for Problems")
-        scan_btn.clicked.connect(self._on_scan)
-        blurry_btn = QPushButton("Remove Blurry Images")
-        blurry_btn.clicked.connect(self._on_remove_blurry)
-        start_btn = QPushButton("Start Processing")
-        start_btn.setObjectName("PrimaryButton")
-        start_btn.clicked.connect(self._on_start)
-        actions.addWidget(prefs_btn)
-        actions.addWidget(scan_btn)
-        actions.addWidget(blurry_btn)
-        actions.addStretch(1)
-        actions.addWidget(start_btn)
-        root.addLayout(actions)
+        root.addWidget(options_card)
 
         # --- Progress ---
         self.progress = QProgressBar()
@@ -180,42 +203,130 @@ class MainWindow(QMainWindow):
         self.progress.setVisible(False)
         root.addWidget(self.progress)
 
-        self.setCentralWidget(central)
+        self._build_toolbar()
 
-    def _build_docks(self) -> None:
-        """Create the detachable log and preview dock widgets."""
+        # --- Results pane: controls above, log/preview below, freely collapsible ---
+        controls_scroll = QScrollArea()
+        controls_scroll.setObjectName("ControlsScrollArea")
+        controls_scroll.setWidgetResizable(True)
+        controls_scroll.setFrameShape(QScrollArea.NoFrame)
+        controls_scroll.setWidget(controls)
 
-        # --- Log dock (bottom, floatable) ---
-        log_dock = QDockWidget("Processing Log", self)
-        log_dock.setObjectName("LogDock")
-        log_dock.setAllowedAreas(
-            Qt.BottomDockWidgetArea | Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea
-        )
         self.log = QTextEdit()
         self.log.setObjectName("LogPanel")
         self.log.setReadOnly(True)
-        self.log.setMinimumHeight(100)
-        log_dock.setWidget(self.log)
-        self.addDockWidget(Qt.BottomDockWidgetArea, log_dock)
-        self._log_dock = log_dock
+        self.log.setMinimumHeight(60)
 
-        # --- Preview dock (bottom, tabbed with log, hidden until first result) ---
-        preview_dock = QDockWidget("Preview", self)
-        preview_dock.setObjectName("PreviewDock")
-        preview_dock.setAllowedAreas(Qt.AllDockWidgetAreas)
         self._preview_panel = PreviewPanel()
-        preview_dock.setWidget(self._preview_panel)
-        self.addDockWidget(Qt.BottomDockWidgetArea, preview_dock)
-        self.tabifyDockWidget(log_dock, preview_dock)
-        preview_dock.hide()
-        self._preview_dock = preview_dock
 
-        # Raise log tab so it's visible by default
-        log_dock.raise_()
+        self._results_tabs = QTabWidget()
+        self._results_tabs.setObjectName("ResultsTabs")
+        self._results_tabs.addTab(self.log, "Log")
+        self._results_tabs.addTab(self._preview_panel, "Preview")
+        self._results_tabs.setMinimumHeight(0)
 
-        # Populate View menu now that docks exist
-        self._view_menu.addAction(log_dock.toggleViewAction())
-        self._view_menu.addAction(preview_dock.toggleViewAction())
+        splitter = QSplitter(Qt.Vertical)
+        splitter.setObjectName("MainSplitter")
+        splitter.setChildrenCollapsible(True)
+        splitter.addWidget(controls_scroll)
+        splitter.addWidget(self._results_tabs)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setSizes([420, 200])
+        splitter.splitterMoved.connect(self._sync_results_action)
+        self._splitter = splitter
+
+        self.setCentralWidget(splitter)
+
+        self._results_action = QAction("Show Results Pane", self)
+        self._results_action.setCheckable(True)
+        self._results_action.setChecked(True)
+        self._results_action.toggled.connect(self._toggle_results_pane)
+        self._view_menu.addAction(self._results_action)
+
+    def _build_toolbar(self) -> None:
+        toolbar = QToolBar("Actions", self)
+        toolbar.setObjectName("ActionToolBar")
+        toolbar.setMovable(False)
+        toolbar.setFloatable(False)
+        # QSS padding/spacing is ignored on QToolBar, so set them on its layout.
+        toolbar.layout().setContentsMargins(14, 10, 14, 10)
+        toolbar.layout().setSpacing(10)
+        self.addToolBar(toolbar)
+
+        for text, handler in (
+            ("Preferences", self._on_prefs),
+            ("Scan for Problems", self._on_scan),
+            ("Remove Blurry Images", self._on_remove_blurry),
+        ):
+            button = QPushButton(text)
+            button.clicked.connect(handler)
+            toolbar.addWidget(button)
+
+        spacer = QWidget()
+        spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        toolbar.addWidget(spacer)
+
+        start_btn = QPushButton("Start Processing")
+        start_btn.setObjectName("PrimaryButton")
+        start_btn.clicked.connect(self._on_start)
+        toolbar.addWidget(start_btn)
+
+    # -- results pane -----------------------------------------------------
+
+    def _toggle_results_pane(self, visible: bool) -> None:
+        sizes = self._splitter.sizes()
+        if visible:
+            if sizes[1] == 0:
+                restored = getattr(self, "_last_results_height", 200) or 200
+                self._splitter.setSizes([max(sizes[0] - restored, 120), restored])
+        elif sizes[1]:
+            self._last_results_height = sizes[1]
+            self._splitter.setSizes([sizes[0] + sizes[1], 0])
+
+    def _sync_results_action(self, *_args) -> None:
+        """Keep the View menu checkmark in step with a manually dragged handle."""
+        expanded = self._splitter.sizes()[1] > 0
+        if expanded != self._results_action.isChecked():
+            self._results_action.blockSignals(True)
+            self._results_action.setChecked(expanded)
+            self._results_action.blockSignals(False)
+
+    def _show_results_pane(self) -> None:
+        if self._splitter.sizes()[1] == 0:
+            self._results_action.setChecked(True)
+
+    # -- persisted window state -------------------------------------------
+
+    def _restore_state(self) -> None:
+        geometry = self._qsettings.value("window/geometry")
+        if geometry is not None:
+            self.restoreGeometry(geometry)
+            screen = QGuiApplication.primaryScreen()
+            if screen is not None:
+                available = screen.availableGeometry()
+                self.resize(
+                    min(self.width(), available.width()),
+                    min(self.height(), available.height()),
+                )
+
+        sizes = self._qsettings.value("window/splitterSizes")
+        if sizes:
+            self._splitter.setSizes([int(size) for size in sizes])
+            self._sync_results_action()
+
+        for key, box in self._option_boxes.items():
+            if box.isHidden():
+                continue
+            saved = self._qsettings.value(f"options/{key}")
+            if saved is not None:
+                box.setChecked(saved in (True, "true", "1"))
+
+    def _save_state(self) -> None:
+        self._qsettings.setValue("window/geometry", self.saveGeometry())
+        self._qsettings.setValue("window/splitterSizes", self._splitter.sizes())
+        for key, box in self._option_boxes.items():
+            self._qsettings.setValue(f"options/{key}", box.isChecked())
 
     # -- option collection -----------------------------------------------
 
@@ -286,14 +397,15 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(text)
 
     def _on_preview_ready(self, path: str) -> None:
-        """Show the preview dock and load the latest panorama thumbnail."""
+        """Reveal the results pane and load the latest panorama thumbnail."""
         self._preview_panel.show_preview(path)
-        self._preview_dock.show()
-        self._preview_dock.raise_()
+        self._show_results_pane()
+        self._results_tabs.setCurrentWidget(self._preview_panel)
 
     # -- shutdown ---------------------------------------------------------
 
     def closeEvent(self, event) -> None:  # noqa: N802
+        self._save_state()
         self.ipc.shutdown()
         self.manager.shutdown()
         super().closeEvent(event)
