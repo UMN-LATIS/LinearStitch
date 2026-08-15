@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-15-xlarge
+          - os: macos-14-xlarge
             TARGET: macos
             CMD_BUILD: >
                 pyinstaller -i icon.icns -w -n LinearStitch LS_GUI.py &&
