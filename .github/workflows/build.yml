@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - 'master'
+      - 'main'
     tags:
       - '*'
 
@@ -52,7 +52,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: macos-14-xlarge
+          - os: macos-15
             TARGET: macos
             CMD_BUILD: >
                 pyinstaller -i icon.icns -w -n LinearStitch LS_GUI.py &&
@@ -117,4 +117,4 @@ jobs:
         run: |
           gh api repos/${GITHUB_REPOSITORY}/releases/tags/latest | jq -r '.assets[] | [.url] | @tsv' | xargs -n 1 gh api -X DELETE || true
           gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch windows-latest binary/LinearStitchWindows.zip"
-          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-13-xlarge binary/LinearStitchMac.zip"
+          gh release upload --repo ${GITHUB_REPOSITORY} --clobber latest "LinearStitch macos-15 binary/LinearStitchMac.zip"
