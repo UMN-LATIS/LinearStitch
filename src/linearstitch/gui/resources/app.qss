@@ -1,0 +1,192 @@
+/* LinearStitch — modern application stylesheet */
+
+* {
+    font-family: "SF Pro Text", "Segoe UI", "Inter", -apple-system, sans-serif;
+    font-size: 13px;
+}
+
+QMainWindow,
+QDialog {
+    background-color: #f5f6f8;
+}
+
+QLabel#HeaderLabel {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2329;
+}
+
+QLabel#SectionLabel {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+}
+
+QGroupBox {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+    margin-top: 14px;
+    padding: 14px 12px 12px 12px;
+    font-weight: 600;
+    color: #374151;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 0 4px;
+}
+
+QListWidget,
+QTextEdit,
+QLineEdit {
+    background-color: #ffffff;
+    border: 1px solid #d7dbe0;
+    border-radius: 8px;
+    padding: 6px;
+    selection-background-color: #2f6fed;
+    selection-color: #ffffff;
+}
+
+QListWidget::item {
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+QListWidget::item:selected {
+    background-color: #2f6fed;
+    color: #ffffff;
+}
+
+QTextEdit#LogPanel {
+    font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+    font-size: 12px;
+    background-color: #1e2228;
+    color: #d6dae0;
+    border: none;
+}
+
+QPushButton {
+    background-color: #ffffff;
+    border: 1px solid #d0d5dc;
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: #1f2329;
+}
+
+QPushButton:hover {
+    background-color: #f0f2f5;
+}
+
+QPushButton:pressed {
+    background-color: #e4e7eb;
+}
+
+QPushButton#PrimaryButton {
+    background-color: #2f6fed;
+    border: 1px solid #2f6fed;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QPushButton#PrimaryButton:hover {
+    background-color: #2a63d4;
+}
+
+QPushButton#PrimaryButton:pressed {
+    background-color: #234fab;
+}
+
+QPushButton:disabled {
+    background-color: #f0f1f3;
+    color: #9aa0a6;
+    border-color: #e3e6ea;
+}
+
+QCheckBox {
+    spacing: 8px;
+    color: #2b2f36;
+    padding: 3px 0;
+}
+
+QCheckBox::indicator {
+    width: 17px;
+    height: 17px;
+    border: 1px solid #c2c8d0;
+    border-radius: 5px;
+    background-color: #ffffff;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #2f6fed;
+    border-color: #2f6fed;
+}
+
+QProgressBar {
+    border: none;
+    border-radius: 6px;
+    background-color: #e3e6ea;
+    height: 10px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #2f6fed;
+    border-radius: 6px;
+}
+
+QStatusBar {
+    background-color: #eef0f3;
+    color: #4b5563;
+}
+
+QMenuBar {
+    background-color: #f5f6f8;
+}
+
+/* ---- Dock widgets ---- */
+
+QDockWidget {
+    font-size: 12px;
+    font-weight: 600;
+    color: #374151;
+    titlebar-close-icon: url();
+    titlebar-normal-icon: url();
+}
+
+QDockWidget::title {
+    background-color: #eef0f3;
+    border-bottom: 1px solid #d7dbe0;
+    padding: 5px 10px;
+    text-align: left;
+}
+
+QDockWidget::close-button,
+QDockWidget::float-button {
+    border: none;
+    padding: 2px;
+    background: transparent;
+}
+
+QDockWidget::close-button:hover,
+QDockWidget::float-button:hover {
+    background: #d7dbe0;
+    border-radius: 4px;
+}
+
+/* ---- Preview panel ---- */
+
+QScrollArea#PreviewScrollArea {
+    background-color: #282c34;
+    border: none;
+}
+
+QLabel#PreviewLabel {
+    background-color: #282c34;
+    color: #6b7280;
+    font-size: 12px;
+    padding: 16px;
+}

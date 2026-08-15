@@ -19,4 +19,61 @@ In order to use the built in FocusStack support, you'll need to download [FocusS
 In order for rotation (straightening the image) to be available, you'll need to install [Libvips](https://www.libvips.org). For Mac, this can be installed via Brew. For Windows users, you should install the prebuilt version of the libvips website and save it in c:\vips-dev. If you understand dylibs on Windows and can explain a better way to do that, I'm all ears. 
 
 ## Configuration
-The "prefs" button allows you to set the input and output paths you'll be using. Be sure to set the path to FocusStack. 
+The "Preferences" button allows you to set the input and output paths you'll be using. Be sure to set the path to FocusStack. 
+
+## Development
+
+LinearStitch is a [PySide6](https://doc.qt.io/qtforpython/) desktop application managed with [uv](https://docs.astral.sh/uv/). The source lives under `src/linearstitch/`.
+
+### Setup
+
+```sh
+uv venv
+uv pip install -e ".[dev]"
+```
+
+### Run
+
+```sh
+uv run linearstitch          # launch the GUI
+uv run linearstitch-fixstack --help   # stack-fixer CLI
+```
+
+The application can also be launched as a module: `python -m linearstitch`.
+
+### Tests, linting & types
+
+```sh
+uv run pytest        # unit + golden + GUI smoke tests
+uv run ruff check src tests
+uv run mypy
+```
+
+The golden tests in `tests/` compare the refactored core against the original
+algorithms (preserved verbatim under `tests/_legacy/`) to guarantee identical
+stitching output.
+
+### Project layout
+
+```
+src/linearstitch/
+  app.py            # QApplication bootstrap
+  branding.py       # LinearStitch / LinearSnap identity
+  config/           # typed settings (config.ini, unchanged format)
+  core/             # GUI-free image processing + pipeline
+  workers/          # background worker threads
+  ipc/              # localhost:6234 job listener
+  gui/              # PySide6 windows, dialogs, widgets, stylesheet
+  cli/              # console entry points
+```
+
+## Packaging
+
+Native bundles are built with [Briefcase](https://briefcase.readthedocs.io/)
+(configured in `pyproject.toml`). The same codebase ships under two brands:
+
+```sh
+uv run briefcase build linearstitch   # LinearStitch.app
+uv run briefcase build linearsnap     # LinearSnap.app
+```
+
