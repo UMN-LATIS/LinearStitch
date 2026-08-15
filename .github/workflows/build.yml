@@ -86,6 +86,11 @@ jobs:
       if: matrix.TARGET == 'macos'
       run: brew install libvips
     - name: Install dependencies
+      # CFLAGS: recent Xcode/clang treat GType function-pointer signature
+      # mismatches between glib and libvips headers as hard errors instead
+      # of warnings, breaking pyvips' cffi build against brew's libvips.
+      env:
+        CFLAGS: -Wno-error=incompatible-function-pointer-types
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
