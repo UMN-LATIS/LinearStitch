@@ -266,8 +266,13 @@ class Stitcher:
                     callback(1, round(i / len(images) * 100));
             except Exception as e:
                 print(e)
-                self.logMessage("Error stitching {} and {}".format(images[i], images[i + 1]))
+                self.logMessage("Error stitching {} and {}: {}".format(images[i], images[i + 1], str(e)))
 
+
+        if composite is None:
+            self.logMessage("Error: Stitching failed - composite image is None. Check the log for details on which image pairs failed.")
+            self.logFile.close()
+            raise RuntimeError("Stitching failed - no composite image was produced. Check the log for details.")
 
         if(cropImage and not rotateImage):
             self.logMessage("Cropping Image")
@@ -312,8 +317,7 @@ class Stitcher:
         
 
         self.logMessage("Size of Composite: " + str(composite.shape))
-        if(composite is not None):
-            cv2.imwrite(outputPath, composite)
+        cv2.imwrite(outputPath, composite)
 
         # resize the image to a max 1000pixel wide by 1000pixel high
         if composite.shape[0] > 1000 or composite.shape[1] > 1000:
