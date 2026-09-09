@@ -81,6 +81,7 @@ class MainWindow(QMainWindow):
         self.scale_path = ""
 
         self.setWindowTitle(self.brand.window_title)
+        self.setUnifiedTitleAndToolBarOnMac(True)
         self.resize(800, 580)
         self._qsettings = QSettings()
         self._build_menu()
@@ -150,7 +151,7 @@ class MainWindow(QMainWindow):
         options_card, options_box = _card("Processing Options")
         options_layout = QGridLayout()
         options_layout.setHorizontalSpacing(24)
-        options_layout.setVerticalSpacing(2)
+        options_layout.setVerticalSpacing(10)
         options_box.addLayout(options_layout)
 
         self.mask_box = QCheckBox("Mask Images")

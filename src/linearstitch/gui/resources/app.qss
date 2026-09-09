@@ -1,9 +1,9 @@
 /* LinearStitch — modern application stylesheet */
 
-* {
-    font-family: "SF Pro Text", "Segoe UI", "Inter", -apple-system, sans-serif;
-    font-size: 13px;
-}
+/* No global "*" selector here: any stylesheet rule matching a widget forces
+   Qt to paint it with the synthesized QStyleSheetStyle instead of the native
+   platform style, so scope every rule to a specific class/objectName and let
+   plain QPushButton/QCheckBox/QLineEdit/etc. render natively. */
 
 QMainWindow,
 QDialog {
@@ -29,25 +29,9 @@ QFrame#Card {
     border-radius: 10px;
 }
 
-QListWidget,
-QTextEdit,
-QLineEdit {
-    background-color: #ffffff;
-    border: 1px solid #d7dbe0;
-    border-radius: 8px;
-    padding: 6px;
-    selection-background-color: #2f6fed;
-    selection-color: #ffffff;
-}
-
 QListWidget::item {
     padding: 4px 6px;
     border-radius: 4px;
-}
-
-QListWidget::item:selected {
-    background-color: #2f6fed;
-    color: #ffffff;
 }
 
 QTextEdit#LogPanel {
@@ -58,25 +42,13 @@ QTextEdit#LogPanel {
     border: none;
 }
 
-QPushButton {
-    background-color: #ffffff;
-    border: 1px solid #d0d5dc;
-    border-radius: 8px;
-    padding: 7px 14px;
-    color: #1f2329;
-}
-
-QPushButton:hover {
-    background-color: #f0f2f5;
-}
-
-QPushButton:pressed {
-    background-color: #e4e7eb;
-}
-
+/* Only the accent "Start Processing" button is custom-drawn; every other
+   QPushButton and QCheckBox keeps the native platform look. */
 QPushButton#PrimaryButton {
     background-color: #2f6fed;
     border: 1px solid #2f6fed;
+    border-radius: 8px;
+    padding: 7px 14px;
     color: #ffffff;
     font-weight: 600;
 }
@@ -89,29 +61,10 @@ QPushButton#PrimaryButton:pressed {
     background-color: #234fab;
 }
 
-QPushButton:disabled {
+QPushButton#PrimaryButton:disabled {
     background-color: #f0f1f3;
     color: #9aa0a6;
     border-color: #e3e6ea;
-}
-
-QCheckBox {
-    spacing: 8px;
-    color: #2b2f36;
-    padding: 3px 0;
-}
-
-QCheckBox::indicator {
-    width: 17px;
-    height: 17px;
-    border: 1px solid #c2c8d0;
-    border-radius: 5px;
-    background-color: #ffffff;
-}
-
-QCheckBox::indicator:checked {
-    background-color: #2f6fed;
-    border-color: #2f6fed;
 }
 
 QProgressBar {
@@ -139,20 +92,14 @@ QMenuBar {
 /* ---- Toolbar, splitter and results tabs ---- */
 
 QToolBar#ActionToolBar {
-    background-color: #fbfbfc;
     border: none;
-    border-bottom: 1px solid #e3e6ea;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     spacing: 10px;
-    padding: 10px 14px;
-}
-
-QToolBar#ActionToolBar QPushButton {
-    min-height: 18px;
-    padding: 8px 16px;
-    font-weight: 500;
+    padding: 6px 14px;
 }
 
 QToolBar#ActionToolBar QPushButton#PrimaryButton {
+    min-height: 18px;
     padding: 8px 22px;
 }
 
