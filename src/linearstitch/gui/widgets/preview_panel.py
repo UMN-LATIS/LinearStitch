@@ -7,22 +7,14 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QLabel, QScrollArea, QSizePolicy
 
 _PREFERRED_HEIGHT = 210
-_MIN_IMAGE_HEIGHT = 40
-
-
 class PreviewPanel(QScrollArea):
-    """Scroll area that shows a panorama preview image fitted to the panel height.
-
-    The image fills the available height and can be scrolled horizontally — ideal
-    for wide stitched panoramas. It rescales as the panel is resized, so the panel
-    never imposes a height floor on the window.
-    """
+    """Show a panorama preview scaled to fit the panel while preserving its aspect ratio."""
 
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setObjectName("PreviewScrollArea")
         self.setWidgetResizable(False)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self._source: QPixmap | None = None
@@ -37,7 +29,7 @@ class PreviewPanel(QScrollArea):
         return QSize(600, _PREFERRED_HEIGHT)
 
     def show_preview(self, path: str) -> None:
-        """Load *path* and display it fitted to the panel height."""
+        """Load *path* and display it fitted to the panel."""
         pixmap = QPixmap(path)
         if pixmap.isNull():
             return
@@ -56,7 +48,8 @@ class PreviewPanel(QScrollArea):
         if self._source is None:
             self._label.resize(viewport.size())
             return
-        height = max(viewport.height(), _MIN_IMAGE_HEIGHT)
-        scaled = self._source.scaledToHeight(height, Qt.SmoothTransformation)
+        scaled = self._source.scaled(
+            viewport.size(), Qt.KeepAspectRatio, Qt.SmoothTransformation
+        )
         self._label.setPixmap(scaled)
-        self._label.resize(max(scaled.width(), viewport.width()), scaled.height())
+        self._label.resize(viewport.size())

@@ -122,6 +122,33 @@ def test_window_fits_small_screens(main_window):
     assert main_window.minimumSizeHint().height() < 600
 
 
+def test_preview_scales_image_to_fit_viewport(qtbot, tmp_path):
+    from PySide6.QtGui import QPixmap
+
+    from linearstitch.gui.widgets.preview_panel import PreviewPanel
+
+    image_path = tmp_path / "wide-preview.png"
+    QPixmap(1200, 300).save(str(image_path))
+
+    panel = PreviewPanel()
+    qtbot.addWidget(panel)
+    panel.resize(300, 100)
+    panel.show()
+    panel.show_preview(str(image_path))
+    qtbot.wait(20)
+
+    displayed = panel._label.pixmap()
+    assert displayed.width() <= panel.viewport().width()
+    assert displayed.height() <= panel.viewport().height()
+    assert panel.horizontalScrollBar().maximum() == 0
+
+    panel.resize(500, 200)
+    qtbot.wait(20)
+    displayed = panel._label.pixmap()
+    assert displayed.width() <= panel.viewport().width()
+    assert displayed.height() <= panel.viewport().height()
+
+
 def test_results_pane_collapses_and_restores(main_window):
     splitter = main_window._splitter
     splitter.setSizes([400, 200])
