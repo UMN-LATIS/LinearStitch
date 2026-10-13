@@ -146,6 +146,10 @@ def test_preferences_dialog_binds_and_saves(qtbot, settings):
 
     dialog = PreferencesDialog(settings)
     qtbot.addWidget(dialog)
+    dialog.show()
+    qtbot.waitExposed(dialog)
+
+    assert dialog.browse_path.width() >= 250
 
     assert dialog.overlap.value() == pytest.approx(0.35)
     assert dialog.core_count.value() == 4

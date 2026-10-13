@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -14,6 +15,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -38,6 +40,7 @@ class PreferencesDialog(QDialog):
 
     def _path_row(self, line_edit: QLineEdit, button: QPushButton) -> QWidget:
         container = QWidget()
+        container.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
         layout = QHBoxLayout(container)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(line_edit, 1)
@@ -50,6 +53,7 @@ class PreferencesDialog(QDialog):
         # --- Paths group ---
         paths_group = QGroupBox("Paths")
         paths_form = QFormLayout(paths_group)
+        paths_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
 
         self.browse_path = QLineEdit()
         browse_btn = QPushButton("Browse…")
@@ -71,6 +75,8 @@ class PreferencesDialog(QDialog):
         # --- Processing group ---
         proc_group = QGroupBox("Processing")
         proc_form = QFormLayout(proc_group)
+        proc_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
+        proc_form.setFormAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
 
         self.core_count = QSpinBox()
         self.core_count.setRange(2, 32)
@@ -109,6 +115,7 @@ class PreferencesDialog(QDialog):
         # --- Zerene group ---
         zerene_group = QGroupBox("Zerene Stacker")
         zerene_form = QFormLayout(zerene_group)
+        zerene_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
 
         self.zerene_path = QLineEdit()
         zerene_btn = QPushButton("Browse…")
@@ -127,6 +134,7 @@ class PreferencesDialog(QDialog):
         # --- FocusStack group ---
         fs_group = QGroupBox("FocusStack")
         fs_form = QFormLayout(fs_group)
+        fs_form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.ExpandingFieldsGrow)
 
         self.focus_stack = QLineEdit()
         fs_btn = QPushButton("Browse…")
