@@ -98,13 +98,14 @@ jobs:
       - name: Build app bundle
         run: briefcase build ${{ matrix.briefcase_platform }}
 
-      # `briefcase package` produces the distributable (DMG / MSI).
-      # --no-sign: skip code-signing in CI (no certificate available).
-      # Add an Apple developer certificate secret + notarisation step here
-      # when you're ready to ship signed builds.
+      # Package the already-built app without Briefcase's distribution signing.
       - name: Package (macOS)
         if: runner.os == 'macOS'
-        run: briefcase package macos --no-sign
+        run: |
+          mkdir -p "$RUNNER_TEMP/linearstitch-dmg" dist
+          ditto "build/linearstitch/macos/app/LinearStitch.app" "$RUNNER_TEMP/linearstitch-dmg/LinearStitch.app"
+          ln -s /Applications "$RUNNER_TEMP/linearstitch-dmg/Applications"
+          hdiutil create -volname LinearStitch -srcfolder "$RUNNER_TEMP/linearstitch-dmg" -format UDZO "dist/LinearStitch.dmg"
 
       - name: Package (Windows)
         if: runner.os == 'Windows'
