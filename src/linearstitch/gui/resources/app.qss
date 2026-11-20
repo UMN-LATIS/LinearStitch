@@ -37,7 +37,7 @@ QListWidget::item {
 /* Pair selection colors: native macOS highlighting can lose its background
    when item styling is customized, leaving white text on white. */
 QListWidget::item:selected {
-    background-color: #2f6fed;
+    background-color: #2457b5;
     color: #ffffff;
 }
 
