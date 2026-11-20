@@ -75,7 +75,7 @@ stitching output.
 ```
 src/linearstitch/
   app.py            # QApplication bootstrap
-  branding.py       # LinearStitch / LinearSnap identity
+  branding.py       # LinearStitch
   config/           # typed settings (config.ini, unchanged format)
   core/             # GUI-free image processing + pipeline
   workers/          # background worker threads
@@ -91,6 +91,5 @@ Native bundles are built with [Briefcase](https://briefcase.readthedocs.io/)
 
 ```sh
 uv run briefcase build linearstitch   # LinearStitch.app
-uv run briefcase build linearsnap     # LinearSnap.app
 ```
 

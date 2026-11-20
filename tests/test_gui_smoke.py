@@ -92,7 +92,7 @@ def main_window(qtbot, settings, monkeypatch, tmp_path):
 
 
 def test_window_builds(main_window):
-    assert main_window.windowTitle() in ("LinearStitch", "LinearSnap")
+    assert main_window.windowTitle() in ("LinearStitch")
     assert main_window.crop_image.isChecked()
     assert main_window.stack_images.isChecked()
     assert main_window.archive_images.isChecked()

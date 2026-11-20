@@ -63,11 +63,11 @@ check_untyped_defs = true
 testpaths = ["tests"]
 addopts = "-ra"
 
-# --- Briefcase packaging (replaces LinearStitch.spec / LinearSnap.spec) ---
 [tool.briefcase]
 project_name = "LinearStitch"
 bundle = "edu.umn.latis"
 version = "2.0.0"
+license = "GPL-3.0+"
 license.file = "license.txt"
 
 [tool.briefcase.app.linearstitch]
@@ -111,39 +111,3 @@ requires = [
     "pyopencl>=2022.3",
 ]
 
-[tool.briefcase.app.linearsnap]
-formal_name = "LinearSnap"
-description = "Image stitcher for linear macro photography sequences."
-sources = ["src/linearstitch"]
-icon = "src/linearstitch/gui/resources/icon"
-requires = [
-    "PySide6>=6.6",
-    "numpy>=1.26",
-    "opencv-contrib-python>=4.6",
-    "Pillow>=9.0.1",
-    "imutils>=0.5.4",
-    "platformdirs>=4.0",
-]
-
-[tool.briefcase.app.linearsnap.macOS]
-requires = [
-    "PySide6>=6.6",
-    "numpy>=1.26",
-    "opencv-contrib-python>=4.6",
-    "Pillow>=9.0.1",
-    "imutils>=0.5.4",
-    "platformdirs>=4.0",
-    "pyvips>=2.2.1",
-    "pyopencl>=2022.3",
-]
-
-[tool.briefcase.app.linearsnap.windows]
-requires = [
-    "PySide6>=6.6",
-    "numpy>=1.26",
-    "opencv-contrib-python>=4.6",
-    "Pillow>=9.0.1",
-    "imutils>=0.5.4",
-    "platformdirs>=4.0",
-    "pyopencl>=2022.3",
-]

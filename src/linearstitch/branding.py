@@ -1,9 +1,5 @@
 """Application branding.
 
-The original project shipped two PyInstaller specs (``LinearStitch.spec`` and
-``LinearSnap.spec``) that built the *same* code under two names. Branding is now
-data-driven: the active brand is selected from the executable / environment so a
-single codebase can ship under either name.
 """
 
 from __future__ import annotations
@@ -22,11 +18,9 @@ class Brand:
 
 
 LINEAR_STITCH = Brand(name="LinearStitch", window_title="LinearStitch")
-LINEAR_SNAP = Brand(name="LinearSnap", window_title="LinearSnap")
 
 _BRANDS = {
-    "linearstitch": LINEAR_STITCH,
-    "linearsnap": LINEAR_SNAP,
+    "linearstitch": LINEAR_STITCH
 }
 
 
@@ -35,7 +29,7 @@ def current_brand() -> Brand:
 
     Resolution order:
     1. ``LINEARSTITCH_BRAND`` environment variable.
-    2. The executable / script base name (e.g. a ``LinearSnap`` bundle).
+    2. The executable / script base name (e.g. a ``LinearStitch`` bundle).
     3. Default to :data:`LINEAR_STITCH`.
     """
 
