@@ -1,9 +1,8 @@
 """GUI smoke tests (pytest-qt).
 
 These verify the widgets build, options are collected correctly and the
-preferences dialog binds to and persists settings — without running any image
-processing. The worker manager and IPC listener are stubbed so no threads,
-sockets or multiprocessing pools start during the test.
+preferences dialog binds to and persists settings. The main window fixture
+stubs the worker manager and IPC listener.
 """
 
 from __future__ import annotations
@@ -97,6 +96,41 @@ def test_window_builds(main_window):
     assert main_window.stack_images.isChecked()
     assert main_window.archive_images.isChecked()
     assert main_window.progress.isHidden()
+
+
+def test_window_and_scan_do_not_spawn_processes(qtbot, settings, monkeypatch, tmp_path):
+    import cv2
+    import numpy as np
+    from PySide6.QtCore import QSettings
+
+    import linearstitch.gui.main_window as mw
+    from linearstitch.core.scanning import scan_folder
+
+    def reject_process(*args, **kwargs):
+        raise AssertionError("Scanning must not start a child process")
+
+    monkeypatch.setattr("multiprocessing.process.BaseProcess.start", reject_process)
+    monkeypatch.setattr(
+        "multiprocessing.resource_tracker.ResourceTracker.ensure_running", reject_process
+    )
+    monkeypatch.setattr(mw.IPCListener, "start", lambda self: None)
+    monkeypatch.setattr(mw.IPCListener, "shutdown", lambda self: None)
+    monkeypatch.setattr(
+        mw, "QSettings", lambda: QSettings(str(tmp_path / "ui.ini"), QSettings.IniFormat)
+    )
+    for name, value in (("a.jpg", 100), ("b.jpg", 100), ("c.jpg", 150)):
+        assert cv2.imwrite(str(tmp_path / name), np.full((8, 8, 3), value, dtype=np.uint8))
+
+    window = mw.MainWindow(settings)
+    qtbot.addWidget(window)
+    try:
+        window.show()
+        window.activateWindow()
+        window.setFocus()
+        qtbot.waitExposed(window)
+        assert scan_folder(str(tmp_path), window.manager._pool) == (["c.jpg"], 0)
+    finally:
+        window.close()
 
 
 def test_options_collected(main_window):

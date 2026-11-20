@@ -7,10 +7,10 @@ thread via Qt signals. Provides graceful shutdown.
 
 from __future__ import annotations
 
-import multiprocessing
 import os
 import queue
 import threading
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from functools import partial
 from os.path import isdir, join
@@ -47,7 +47,7 @@ class PipelineSignals(QObject):
 
 
 class WorkerManager:
-    """Owns the processing queues, worker threads and the multiprocessing pool."""
+    """Owns the processing queues, worker threads and the scan pool."""
 
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
@@ -56,7 +56,7 @@ class WorkerManager:
         self._stop = threading.Event()
         self._batch_lock = threading.Lock()
         self._threads: list[threading.Thread] = []
-        self._pool: multiprocessing.pool.Pool | None = None
+        self._pool: ThreadPoolExecutor | None = None
 
         self.scan_queue: queue.Queue = queue.Queue()
         self.focus_queue: queue.Queue = queue.Queue()
@@ -75,7 +75,7 @@ class WorkerManager:
     # -- lifecycle --------------------------------------------------------
 
     def start(self) -> None:
-        self._pool = multiprocessing.Pool()
+        self._pool = ThreadPoolExecutor()
         core_count = self.settings.core_count
 
         for _ in range(core_count):
@@ -106,8 +106,7 @@ class WorkerManager:
         for thread in self._threads:
             thread.join(timeout=timeout)
         if self._pool is not None:
-            self._pool.terminate()
-            self._pool.join()
+            self._pool.shutdown(wait=False, cancel_futures=True)
             self._pool = None
 
     # -- public submission API -------------------------------------------

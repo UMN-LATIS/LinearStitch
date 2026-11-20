@@ -13,7 +13,7 @@ MessageCallback = Callable[[str], None]
 
 
 class Processor:
-    """Compute the average colour of an image (picklable for multiprocessing)."""
+    """Compute the average colour of an image."""
 
     def __init__(self, path: str) -> None:
         self._path = path
@@ -35,7 +35,7 @@ def scan_folder(path: str, pool) -> tuple[list[str], int]:
         return [], 0
 
     proc = Processor(path)
-    color_average = pool.map(proc, only_jpegs)
+    color_average = list(pool.map(proc, only_jpegs))
     mean_values = numpy.array(color_average).mean(axis=0)
 
     problem_index = []
