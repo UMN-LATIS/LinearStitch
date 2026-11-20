@@ -1,0 +1,168 @@
+/* LinearStitch — modern application stylesheet */
+
+/* No global "*" selector here: any stylesheet rule matching a widget forces
+   Qt to paint it with the synthesized QStyleSheetStyle instead of the native
+   platform style, so scope every rule to a specific class/objectName and let
+   plain QPushButton/QCheckBox/QLineEdit/etc. render natively. */
+
+QMainWindow,
+QDialog {
+    background-color: #f5f6f8;
+}
+
+QLabel#HeaderLabel {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2329;
+}
+
+QLabel#SectionLabel {
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    padding-left: 2px;
+}
+
+QFrame#Card {
+    background-color: #ffffff;
+    border: 1px solid #e3e6ea;
+    border-radius: 10px;
+}
+
+QListWidget::item {
+    padding: 4px 6px;
+    border-radius: 4px;
+}
+
+/* Pair selection colors: native macOS highlighting can lose its background
+   when item styling is customized, leaving white text on white. */
+QListWidget::item:selected {
+    background-color: #2f6fed;
+    color: #ffffff;
+}
+
+QTextEdit#LogPanel {
+    font-family: "SF Mono", "Cascadia Code", "Consolas", monospace;
+    font-size: 12px;
+    background-color: #1e2228;
+    color: #d6dae0;
+    border: none;
+}
+
+/* Only the accent "Start Processing" button is custom-drawn; every other
+   QPushButton and QCheckBox keeps the native platform look. */
+QPushButton#PrimaryButton {
+    background-color: #2f6fed;
+    border: 1px solid #2f6fed;
+    border-radius: 8px;
+    padding: 7px 14px;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+QPushButton#PrimaryButton:hover {
+    background-color: #2a63d4;
+}
+
+QPushButton#PrimaryButton:pressed {
+    background-color: #234fab;
+}
+
+QPushButton#PrimaryButton:disabled {
+    background-color: #f0f1f3;
+    color: #9aa0a6;
+    border-color: #e3e6ea;
+}
+
+QProgressBar {
+    border: none;
+    border-radius: 6px;
+    background-color: #e3e6ea;
+    height: 10px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #2f6fed;
+    border-radius: 6px;
+}
+
+QStatusBar {
+    background-color: #eef0f3;
+    color: #4b5563;
+}
+
+QMenuBar {
+    background-color: #f5f6f8;
+}
+
+/* ---- Toolbar, splitter and results tabs ---- */
+
+QToolBar#ActionToolBar {
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    spacing: 10px;
+    padding: 6px 14px;
+}
+
+QToolBar#ActionToolBar QPushButton#PrimaryButton {
+    min-height: 18px;
+    padding: 8px 22px;
+}
+
+QScrollArea#ControlsScrollArea,
+QScrollArea#ControlsScrollArea > QWidget > QWidget {
+    background-color: #f5f6f8;
+}
+
+QSplitter#MainSplitter::handle {
+    background-color: #dfe3e8;
+    height: 6px;
+}
+
+QSplitter#MainSplitter::handle:hover {
+    background-color: #c2c8d0;
+}
+
+QTabWidget#ResultsTabs::pane {
+    border: none;
+    border-top: 1px solid #d7dbe0;
+}
+
+QTabWidget#ResultsTabs::tab-bar {
+    alignment: left;
+    left: 8px;
+}
+
+QTabWidget#ResultsTabs QTabBar::tab {
+    background-color: #eef0f3;
+    color: #4b5563;
+    border: 1px solid #d7dbe0;
+    border-bottom: none;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    min-width: 72px;
+    padding: 4px 12px;
+    margin-right: 2px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+QTabWidget#ResultsTabs QTabBar::tab:selected {
+    background-color: #2f6fed;
+    color: #ffffff;
+    border-color: #2f6fed;
+}
+
+/* ---- Preview panel ---- */
+
+QScrollArea#PreviewScrollArea {
+    background-color: #282c34;
+    border: none;
+}
+
+QLabel#PreviewLabel {
+    background-color: #282c34;
+    color: #6b7280;
+    font-size: 12px;
+}

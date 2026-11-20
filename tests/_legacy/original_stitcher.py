@@ -268,12 +268,10 @@ class Stitcher:
                 print(e)
                 self.logMessage("Error stitching {} and {}: {}".format(images[i], images[i + 1], str(e)))
 
-
         if composite is None:
             self.logMessage("Error: Stitching failed - composite image is None. Check the log for details on which image pairs failed.")
             self.logFile.close()
             raise RuntimeError("Stitching failed - no composite image was produced. Check the log for details.")
-
         if(cropImage and not rotateImage):
             self.logMessage("Cropping Image")
             composite = composite[int(self.maxOffset):(composite.shape[0]-int(self.maxOffset)), 0:composite.shape[1]]
