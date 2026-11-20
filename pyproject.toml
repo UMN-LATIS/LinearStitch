@@ -1,0 +1,149 @@
+[project]
+name = "linearstitch"
+version = "2.0.0"
+description = "A simple image stitcher for linear (single-row) macro photography sequences."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "license.txt" }
+authors = [{ name = "Regents of the University of Minnesota" }]
+dependencies = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+]
+
+[project.optional-dependencies]
+# Optional hardware-accelerated features — both fail gracefully when absent.
+# pyvips: vips rotation/straighten (hidden in the UI on Windows if missing)
+# pyopencl: GPU-accelerated vignette removal (skipped silently if no OpenCL)
+vips = ["pyvips>=2.2.1"]
+opencl = ["pyopencl>=2022.3"]
+all = ["linearstitch[vips,opencl]"]
+dev = [
+    "pytest>=8.0",
+    "pytest-qt>=4.4",
+    "ruff>=0.5",
+    "mypy>=1.10",
+]
+
+[project.scripts]
+linearstitch = "linearstitch.__main__:main"
+linearstitch-fixstack = "linearstitch.cli.stackfix:main"
+
+[project.gui-scripts]
+linearstitch-gui = "linearstitch.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/linearstitch"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "tests"]
+extend-exclude = ["tests/_legacy"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "W"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+packages = ["linearstitch"]
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+# --- Briefcase packaging (replaces LinearStitch.spec / LinearSnap.spec) ---
+[tool.briefcase]
+project_name = "LinearStitch"
+bundle = "edu.umn.latis"
+version = "2.0.0"
+license.file = "license.txt"
+
+[tool.briefcase.app.linearstitch]
+formal_name = "LinearStitch"
+description = "Image stitcher for linear macro photography sequences."
+sources = ["src/linearstitch"]
+icon = "src/linearstitch/gui/resources/icon"
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+]
+
+[tool.briefcase.app.linearstitch.macOS]
+# macOS gets both optional extras (libvips installed via brew in CI)
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+    "pyvips>=2.2.1",
+    "pyopencl>=2022.3",
+]
+
+[tool.briefcase.app.linearstitch.windows]
+# Windows: pyopencl only — pyvips requires libvips DLLs which aren't available;
+# the "Straighten Image" option is automatically hidden in the UI when libvips
+# is absent, so pyvips is never imported.
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+    "pyopencl>=2022.3",
+]
+
+[tool.briefcase.app.linearsnap]
+formal_name = "LinearSnap"
+description = "Image stitcher for linear macro photography sequences."
+sources = ["src/linearstitch"]
+icon = "src/linearstitch/gui/resources/icon"
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+]
+
+[tool.briefcase.app.linearsnap.macOS]
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+    "pyvips>=2.2.1",
+    "pyopencl>=2022.3",
+]
+
+[tool.briefcase.app.linearsnap.windows]
+requires = [
+    "PySide6>=6.6",
+    "numpy>=1.26",
+    "opencv-contrib-python>=4.6",
+    "Pillow>=9.0.1",
+    "imutils>=0.5.4",
+    "platformdirs>=4.0",
+    "pyopencl>=2022.3",
+]
