@@ -67,7 +67,6 @@ addopts = "-ra"
 project_name = "LinearStitch"
 bundle = "edu.umn.latis"
 version = "2.0.0"
-license = "GPL-3.0+"
 license.file = "license.txt"
 
 [tool.briefcase.app.linearstitch]
