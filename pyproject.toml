@@ -84,15 +84,17 @@ requires = [
 ]
 
 [tool.briefcase.app.linearstitch.macOS]
-# macOS gets both optional extras (libvips installed via brew in CI)
+# The pyvips binary extra bundles libvips with the app.
+# OpenCV 4.9 is the newest version with wheels for both macOS architectures;
+# those wheels require NumPy 1.x.
 requires = [
     "PySide6>=6.6",
-    "numpy>=1.26",
-    "opencv-contrib-python>=4.6",
+    "numpy>=1.26,<2",
+    "opencv-contrib-python>=4.6,<4.10",
     "Pillow>=9.0.1",
     "imutils>=0.5.4",
     "platformdirs>=4.0",
-    "pyvips>=2.2.1",
+    "pyvips[binary]>=3.2",
     "pyopencl>=2022.3",
 ]
 

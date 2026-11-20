@@ -66,11 +66,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # macOS: install libvips so pyvips gets the native library it wraps
-      - name: Install libvips (macOS)
-        if: runner.os == 'macOS'
-        run: brew install libvips
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -80,14 +75,23 @@ jobs:
       - name: Install Briefcase
         run: pip install briefcase
 
+      # Briefcase requires wheels; imutils is only published as a source archive.
+      - name: Build imutils wheel
+        run: python -m pip wheel --no-deps --wheel-dir "${{ runner.temp }}/linearstitch-wheels" "imutils>=0.5.4"
+
+      # Build pyvips in ABI mode so one wheel works for both macOS architectures.
+      - name: Build pyvips wheel
+        if: runner.os == 'macOS'
+        env:
+          PKG_CONFIG_LIBDIR: ${{ runner.temp }}/linearstitch-wheels
+          PKG_CONFIG_PATH: ""
+        run: python -m pip wheel --no-deps --no-cache-dir --wheel-dir "${{ runner.temp }}/linearstitch-wheels" "pyvips>=3.2"
+
       # `briefcase create` downloads Python, creates the app skeleton and
       # installs the app's dependencies into it.
-      # CFLAGS: recent Xcode/clang treat GType function-pointer signature
-      # mismatches between glib and libvips headers as hard errors instead
-      # of warnings, breaking pyvips' cffi build against brew's libvips.
       - name: Create app bundle
         env:
-          CFLAGS: -Wno-error=incompatible-function-pointer-types
+          PIP_FIND_LINKS: ${{ runner.temp }}/linearstitch-wheels
         run: briefcase create ${{ matrix.briefcase_platform }}
 
       # `briefcase build` compiles/links the bundle into a runnable .app
