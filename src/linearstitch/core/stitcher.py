@@ -27,10 +27,12 @@ class Stitcher:
         self,
         overlap: float,
         message_callback: MessageCallback | None = None,
+        error_callback: MessageCallback | None = None,
     ) -> None:
         self.overlap = overlap
         self.max_offset = 0
         self._message_callback = message_callback
+        self._error_callback = error_callback
         self._log_file = None
 
     # -- logging ----------------------------------------------------------
@@ -232,7 +234,10 @@ class Stitcher:
                     callback(1, round(i / len(images) * 100))
             except Exception as e:  # noqa: BLE001 — preserve original tolerant behaviour
                 print(e)
-                self._log(f"Error stitching {images[i]} and {images[i + 1]}")
+                message = f"Error stitching {images[i]} and {images[i + 1]}"
+                self._log(message)
+                if self._error_callback is not None:
+                    self._error_callback(f"{message}: {e}")
 
         if crop_image and not rotate_image:
             self._log("Cropping Image")

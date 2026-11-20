@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import ctypes.util
 import os
+import queue
 
 from PySide6.QtCore import QSettings, Qt
 from PySide6.QtGui import QAction, QGuiApplication
@@ -15,6 +16,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMessageBox,
     QProgressBar,
     QPushButton,
     QScrollArea,
@@ -29,12 +31,14 @@ from PySide6.QtWidgets import (
 
 from ..branding import Brand, current_brand
 from ..config import Settings
-from ..core.pipeline import ProcessingOptions
+from ..core.pipeline import ProcessingOptions, SequenceGap, format_sequence_gaps
 from ..ipc.listener import IPCListener
 from ..workers.manager import WorkerManager
 from .preferences_dialog import PreferencesDialog
 from .widgets.file_list import FolderListWidget, choose_directories
 from .widgets.preview_panel import PreviewPanel
+
+_MAX_VISIBLE_MISSING_ENTRIES = 10
 
 
 def _card(title: str) -> tuple[QWidget, QVBoxLayout]:
@@ -73,6 +77,7 @@ class MainWindow(QMainWindow):
         self.manager.signals.progress.connect(self._on_progress)
         self.manager.signals.status.connect(self._on_status)
         self.manager.signals.preview_ready.connect(self._on_preview_ready)
+        self.manager.signals.sequence_gap.connect(self._on_sequence_gap)
         self.manager.start()
 
         self.ipc = IPCListener(self.manager.submit_process)
@@ -383,10 +388,37 @@ class MainWindow(QMainWindow):
     def _on_start(self) -> None:
         self.progress.setVisible(True)
         self.manager.update_options(self._current_options())
-        for folder in self.folder_list.folders():
-            self.manager.submit_process(folder)
+        self.manager.submit_process_batch(self.folder_list.folders())
 
     # -- signals ----------------------------------------------------------
+
+    def _on_sequence_gap(
+        self, folder: str, gaps: list[SequenceGap], response: queue.Queue[bool]
+    ) -> None:
+        dialog = QMessageBox(self)
+        dialog.setIcon(QMessageBox.Icon.Warning)
+        dialog.setWindowTitle("Potentially missing file")
+        dialog.setTextFormat(Qt.TextFormat.PlainText)
+        dialog.setText(
+            f"{os.path.basename(os.path.normpath(folder))} is potentially missing a file"
+        )
+        missing = format_sequence_gaps(gaps)
+
+        visible = missing[:_MAX_VISIBLE_MISSING_ENTRIES]
+        if len(missing) > _MAX_VISIBLE_MISSING_ENTRIES:
+            visible.append(
+                f"... and {len(missing) - _MAX_VISIBLE_MISSING_ENTRIES} more entries. "
+                "Select Show Details to view all."
+            )
+            dialog.setDetailedText("\n".join(missing))
+        dialog.setInformativeText("Potentially missing:\n" + "\n".join(visible))
+
+        skip_button = dialog.addButton("Skip this core", QMessageBox.ButtonRole.RejectRole)
+        continue_button = dialog.addButton("Continue", QMessageBox.ButtonRole.AcceptRole)
+        dialog.setDefaultButton(skip_button)
+        dialog.setEscapeButton(skip_button)
+        dialog.exec()
+        response.put(dialog.clickedButton() is continue_button)
 
     def _append_log(self, text: str) -> None:
         self.log.append(text.rstrip("\n"))

@@ -108,7 +108,12 @@ class PreferencesDialog(QDialog):
         proc_form.addRow("", self.prune_before)
 
         self.right_to_left = QCheckBox("Right to Left Core")
+        self.pause_on_missing_files = QCheckBox("Pause on Missing Files")
+        self.pause_on_missing_files.setToolTip(
+            "When disabled, processing continues and missing files are reported in the batch log."
+        )
         proc_form.addRow("", self.right_to_left)
+        proc_form.addRow("", self.pause_on_missing_files)
 
         outer.addWidget(proc_group)
 
@@ -186,6 +191,7 @@ class PreferencesDialog(QDialog):
         self.focus_launch.setText(v["FocusStackLaunchPath"])
         self.right_to_left.setChecked(bool(v["RightToLeft"]))
         self.prune_before.setChecked(bool(v["PruneBeforeStacking"]))
+        self.pause_on_missing_files.setChecked(bool(v["PauseOnMissingFiles"]))
         idx = self.stacker.findText(v["StackerSelection"])
         if idx >= 0:
             self.stacker.setCurrentIndex(idx)
@@ -207,6 +213,7 @@ class PreferencesDialog(QDialog):
         v["FocusStackLaunchPath"] = self.focus_launch.text()
         v["RightToLeft"] = self.right_to_left.isChecked()
         v["PruneBeforeStacking"] = self.prune_before.isChecked()
+        v["PauseOnMissingFiles"] = self.pause_on_missing_files.isChecked()
         v["StackerSelection"] = self.stacker.currentText()
         self.settings.save()
         self.accept()

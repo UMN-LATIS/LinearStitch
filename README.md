@@ -21,6 +21,23 @@ In order for rotation (straightening the image) to be available, you'll need to 
 ## Configuration
 The "Preferences" button allows you to set the input and output paths you'll be using. Be sure to set the path to FocusStack. 
 
+Before stitching each core (after stacking, if enabled), LinearStitch checks for
+gaps in numbered JPG filenames, such as `0001.jpg`, `0003.jpg`. If a gap is
+found, an alert says "<core folder name> is potentially missing a file" and
+lists the likely missing filenames. Long lists have a **Show Details** button;
+very large consecutive gaps are shown as filename ranges.
+Choose **Skip this core** to leave it unstitched and unarchived, or **Continue**
+to stitch it anyway. To process without pausing, turn off **Pause on Missing
+Files** in Preferences. Suspected missing filenames and reported processing errors are
+then summarized in the log after all cores in the batch finish, including
+archiving. This preference applies to batches queued after it is saved; each
+externally submitted core is a separate batch.
+
+Numbering can start anywhere and use any padding width.
+The check compares matching filename patterns with one varying numeric field;
+unnumbered or ambiguous names are left alone. It cannot detect missing images
+before the first or after the last available number.
+
 ## Development
 
 LinearStitch is a [PySide6](https://doc.qt.io/qtforpython/) desktop application managed with [uv](https://docs.astral.sh/uv/). The source lives under `src/linearstitch/`.

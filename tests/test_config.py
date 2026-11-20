@@ -17,6 +17,7 @@ def test_defaults_match_original(tmp_path):
     assert v["FocusThreshold"] == "13.0"
     assert v["RightToLeft"] is False
     assert v["PruneBeforeStacking"] is False
+    assert v["PauseOnMissingFiles"] is True
     assert v["StackerSelection"] == "FocusStack"
     assert v["ZereneTemplateFile"] == "zereneTemplate.xml"
 
@@ -29,6 +30,7 @@ def test_typed_accessors(tmp_path):
     assert settings.focus_threshold == 13.0
     assert settings.right_to_left is False
     assert settings.prune_before_stacking is False
+    assert settings.pause_on_missing_files is True
     assert settings.stacker_selection == "FocusStack"
 
 
@@ -37,6 +39,7 @@ def test_round_trip(tmp_path):
     settings = Settings(config_path=path)
     settings.values["Overlap"] = "0.5"
     settings.values["RightToLeft"] = True
+    settings.values["PauseOnMissingFiles"] = False
     settings.values["CoreCount"] = "8"
     settings.values["StackerSelection"] = "Zerene"
     settings.save()
@@ -46,6 +49,7 @@ def test_round_trip(tmp_path):
     parser.read(path)
     assert parser.get("Processing", "Overlap") == "0.5"
     assert parser.get("Processing", "RightToLeft") == "1"
+    assert parser.get("Processing", "PauseOnMissingFiles") == "0"
     assert parser.get("Processing", "CoreCount") == "8"
     assert parser.get("Processing", "StackerSelection") == "Zerene"
 
@@ -53,5 +57,6 @@ def test_round_trip(tmp_path):
     reloaded = Settings(config_path=path)
     assert reloaded.values["Overlap"] == "0.5"
     assert reloaded.values["RightToLeft"] is True
+    assert reloaded.pause_on_missing_files is False
     assert reloaded.core_count == 8
     assert reloaded.stacker_selection == "Zerene"

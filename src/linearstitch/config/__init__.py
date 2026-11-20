@@ -89,6 +89,7 @@ class Settings:
         v["FocusThreshold"] = get("Processing", "FocusThreshold", fallback="13.0")
         v["RightToLeft"] = get("Processing", "RightToLeft", fallback="0") == "1"
         v["PruneBeforeStacking"] = get("Processing", "PruneBeforeStacking", fallback="0") == "1"
+        v["PauseOnMissingFiles"] = get("Processing", "PauseOnMissingFiles", fallback="1") == "1"
         v["StackerSelection"] = get("Processing", "StackerSelection", fallback="FocusStack")
 
         v["FocusStackInstall"] = get("FocusStack", "Install", fallback=home)
@@ -118,6 +119,7 @@ class Settings:
         s("Processing", "Overlap", str(v["Overlap"]))
         s("Processing", "RightToLeft", "1" if v["RightToLeft"] else "0")
         s("Processing", "PruneBeforeStacking", "1" if v["PruneBeforeStacking"] else "0")
+        s("Processing", "PauseOnMissingFiles", "1" if v["PauseOnMissingFiles"] else "0")
         s("Processing", "StackerSelection", v["StackerSelection"])
 
         s("FocusStack", "Install", v["FocusStackInstall"])
@@ -151,6 +153,10 @@ class Settings:
     @property
     def prune_before_stacking(self) -> bool:
         return bool(self.values["PruneBeforeStacking"])
+
+    @property
+    def pause_on_missing_files(self) -> bool:
+        return bool(self.values["PauseOnMissingFiles"])
 
     @property
     def stacker_selection(self) -> str:
